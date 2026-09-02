@@ -26,8 +26,24 @@ function oyya_valid_libyan_phone(string $phone): bool { return (bool)preg_match(
 function oyya_current_user(): ?array { return empty($_SESSION['oyya_uid'])?null:oyya_user_by_id((string)$_SESSION['oyya_uid']); }
 function oyya_seed_system_user(): void {
     $users=oyya_users();
-    foreach($users as $u) if(($u['id']??'')===OYYA_SYSTEM_USER_ID) return;
-    $users[]=['id'=>OYYA_SYSTEM_USER_ID,'name'=>'OYYA','phone'=>'','password_hash'=>'','city'=>'ليبيا','skills'=>'OYYA','interests'=>'ليبيا، المجتمع، الفرص، الأحداث','study_work'=>'الحساب الرسمي لـ OYYA','hobbies'=>'','offers'=>'اكتشاف ما يحدث حولك','seeks'=>'','bio'=>'الحساب الرسمي داخل عالم OYYA.','location_visibility'=>'hidden','verified'=>true,'system'=>true,'created_at'=>oyya_now()];
+    $ids=array_column($users,'id');
+    if(!in_array(OYYA_SYSTEM_USER_ID,$ids,true)){
+      $users[]=['id'=>OYYA_SYSTEM_USER_ID,'name'=>'OYYA','phone'=>'','password_hash'=>'','city'=>'ليبيا','skills'=>'OYYA','interests'=>'ليبيا، المجتمع، الفرص، الأحداث','study_work'=>'الحساب الرسمي لـ OYYA','hobbies'=>'','offers'=>'اكتشاف ما يحدث حولك','seeks'=>'','bio'=>'الحساب الرسمي داخل عالم OYYA.','location_visibility'=>'hidden','verified'=>true,'system'=>true,'created_at'=>oyya_now()];
+    }
+    $demo=[
+      ['demo-sara','سارة الورفلي','بنغازي','مديرة تسويق رقمي','استراتيجية المحتوى، الحملات، بناء العلامات','التسويق، ريادة الأعمال، التقنية','أساعد العلامات الليبية على بناء حضور رقمي أقوى.','تصوير، قهوة مختصة، سفر','استشارات تسويق وحملات رقمية','شراكات ومشاريع إبداعية','https://i.pravatar.cc/300?img=47','Nova Creative Lab','جامعة بنغازي','5 سنوات'],
+      ['demo-mohamed','محمد السنوسي','بنغازي','مهندس برمجيات Full‑Stack','Laravel، JavaScript، APIs، PWA','البرمجة، الذكاء الاصطناعي، المنتجات','أبني منتجات ويب سريعة وبسيطة تحل مشاكل حقيقية.','ألعاب، شطرنج، قراءة','تطوير منصات وتطبيقات ويب','فريق منتج أو مشروع تقني','https://i.pravatar.cc/300?img=12','Freelance / Product Builder','جامعة بنغازي','6 سنوات'],
+      ['demo-lina','لينا القماطي','طرابلس','مصممة هوية وتجربة مستخدم','Branding، UI/UX، Design Systems','التصميم، الموضة، الثقافة','أحب تحويل الأفكار المعقدة إلى تجارب بسيطة وواضحة.','رسم، تصوير، معارض','هوية بصرية وتصميم منتجات','تعاون مع شركات ناشئة','https://i.pravatar.cc/300?img=32','Studio L','جامعة طرابلس','4 سنوات'],
+      ['demo-ahmed','أحمد الجبالي','مصراتة','رائد أعمال في التجارة الإلكترونية','E‑commerce، مبيعات، عمليات','التجارة، اللوجستيات، الاستثمار','أدير متجرًا إلكترونيًا وأهتم ببناء عمليات بيع قابلة للتوسع.','سيارات، جيم، سفر','خبرة في التجارة والتشغيل','فرص توسع وشركاء توزيع','https://i.pravatar.cc/300?img=68','Jebali Commerce','جامعة مصراتة','7 سنوات'],
+      ['demo-rima','ريما العبيدي','بنغازي','مهندسة معمارية ومصممة داخلية','Architecture، Interior Design، 3D','العقار، الفن، التصميم','أصمم مساحات عملية بهوية معاصرة تناسب الحياة اليومية.','رسم، ديكور، موسيقى','تصميم معماري وداخلي','مشاريع سكنية وتجارية','https://i.pravatar.cc/300?img=44','Rima Studio','جامعة بنغازي','5 سنوات'],
+      ['demo-yousef','يوسف الزوي','بنغازي','مصور وصانع محتوى','Photography، Video، Editing','الإعلام، السفر، القصص','أوثق الناس والأماكن بطريقة تحكي قصة حقيقية.','كرة قدم، رحلات، سينما','تصوير تجاري ومحتوى','علامات تحتاج محتوى مستمر','https://i.pravatar.cc/300?img=11','Independent Creator','المعهد العالي للإعلام','8 سنوات'],
+      ['demo-nour','نور الترهوني','طرابلس','محامية ومستشارة أعمال','قانون شركات، عقود، تفاوض','الأعمال، الاستثمار، التشريعات','أساعد رواد الأعمال على فهم العقود والقرارات القانونية قبل التوقيع.','قراءة، بودكاست، سفر','استشارات قانونية للأعمال','شركات ناشئة تحتاج تنظيم عقودها','https://i.pravatar.cc/300?img=49','مكتب الترهوني','جامعة طرابلس','7 سنوات'],
+      ['demo-omar','عمر الفيتوري','بنغازي','مختص موارد بشرية وتوظيف','Recruitment، HR، Career Coaching','الوظائف، التعليم، التطوير','أربط الشركات بالكفاءات وأساعد الشباب في بناء مسار مهني أوضح.','جري، كتب، تطوع','توظيف ومراجعة ملفات مهنية','مواهب وشركات توظف','https://i.pravatar.cc/300?img=5','People First Libya','جامعة بنغازي','6 سنوات']
+    ];
+    foreach($demo as $d){
+      if(in_array($d[0],array_column($users,'id'),true))continue;
+      $users[]=['id'=>$d[0],'name'=>$d[1],'phone'=>'','password_hash'=>'','city'=>$d[2],'headline'=>$d[3],'skills'=>$d[4],'interests'=>$d[5],'study_work'=>$d[10],'hobbies'=>$d[7],'offers'=>$d[8],'seeks'=>$d[9],'bio'=>$d[6],'avatar'=>$d[11],'company'=>$d[10],'education'=>$d[11]??'','experience'=>$d[12]??'','location_visibility'=>'city','verified'=>true,'system'=>true,'demo_profile'=>true,'created_at'=>oyya_now()];
+    }
     oyya_save_users($users);
 }
 function oyya_register(array $in): array {
