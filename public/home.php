@@ -5,14 +5,14 @@ ob_start();
 require __DIR__ . '/entry.php';
 $html = (string)ob_get_clean();
 
-$headInject = "\n<link rel=\"stylesheet\" href=\"/oyya-ui.css?v=1\">\n";
+$headInject = "\n<link rel=\"stylesheet\" href=\"/oyya-ui.css?v=2\">\n";
 $bodyInject = <<<'HTML'
 
 <div class="oyya-bottom-shell" id="oyyaBottomShell" aria-label="تنقل OYYA">
   <nav class="oyya-bottom-nav" id="oyyaSmartNav">
     <a class="oyya-nav-item" data-view="feed" href="/?view=feed"><span class="oyya-nav-icon">⌂</span><span>الرئيسية</span></a>
-    <a class="oyya-nav-item" data-view="nearby" href="/?view=nearby"><span class="oyya-nav-icon">◎</span><span>حولك</span></a>
     <a class="oyya-nav-item" data-view="reels" href="/?view=reels"><span class="oyya-nav-icon">▶</span><span>Reels</span></a>
+    <a class="oyya-nav-item" data-view="nearby" href="/?view=nearby"><span class="oyya-nav-icon">⌖</span><span>حولك</span></a>
     <button class="oyya-nav-item oyya-radio-nav" type="button" id="oyyaRadioNav"><span class="oyya-nav-icon">♫</span><span>تشغيل</span></button>
     <button class="oyya-nav-item" type="button" id="oyyaMoreButton" aria-expanded="false"><span class="oyya-nav-icon">•••</span><span>المزيد</span></button>
   </nav>
@@ -39,7 +39,7 @@ $bodyInject = <<<'HTML'
     <a href="/?view=ads" data-view="ads"><b>الإعلانات</b><small>حملات ممولة داخل العالم</small></a>
   </div>
 </section>
-<script src="/oyya-ui.js?v=1" defer></script>
+<script src="/oyya-ui.js?v=2" defer></script>
 HTML;
 
 if (stripos($html, '</head>') !== false) $html = str_ireplace('</head>', $headInject . '</head>', $html);
