@@ -8,14 +8,9 @@ $source=str_replace($bad,$good,$source,$count);
 if($count!==1){http_response_code(500);echo 'OYYA compile guard failed.';exit;}
 $source=str_replace('$usersCount=count($users);','$usersCount=count(oyya_test_users());',$source);
 $source=str_replace('__DIR__',var_export(__DIR__,true),$source);
-$tmp=sys_get_temp_dir().'/oyya-main-'.sha1($source).'.php';
-file_put_contents($tmp,$source,LOCK_EX);
-ob_start();
-require $tmp;
-$out=(string)ob_get_clean();
+$tmp=sys_get_temp_dir().'/oyya-main-'.sha1($source).'.php';file_put_contents($tmp,$source,LOCK_EX);ob_start();require $tmp;$out=(string)ob_get_clean();
 $isMap=((string)($_GET['view']??'feed'))==='map';
 $mapAssets='<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@5.7.0/dist/maplibre-gl.css"><link rel="stylesheet" href="/oyya-map-snap.css?v=1"><script defer src="https://cdn.jsdelivr.net/npm/maplibre-gl@5.7.0/dist/maplibre-gl.js"></script><script defer src="/oyya-vector-map.js?v=7"></script>';
 $experienceAsset=$isMap?'':'<script defer src="/oyya-experience.js?v=4"></script>';
-$assets=$mapAssets.'<link rel="stylesheet" href="/oyya-experience.css?v=2"><link rel="stylesheet" href="/oyya-modern-colors.css?v=2"><link rel="stylesheet" href="/oyya-themes.css?v=1"><link rel="stylesheet" href="/oyya-profiles.css?v=1"><link rel="stylesheet" href="/oyya-social.css?v=1">'.$experienceAsset.'<script defer src="/oyya-nav-gesture.js?v=4"></script><script defer src="/oyya-composer.js?v=2"></script><script defer src="/oyya-themes.js?v=1"></script><script defer src="/oyya-profiles.js?v=1"></script><script defer src="/oyya-social.js?v=1"></script>';
-if(stripos($out,'</head>')!==false)$out=str_ireplace('</head>',$assets.'</head>',$out);
-echo $out;
+$assets=$mapAssets.'<link rel="stylesheet" href="/oyya-experience.css?v=2"><link rel="stylesheet" href="/oyya-modern-colors.css?v=2"><link rel="stylesheet" href="/oyya-themes.css?v=1"><link rel="stylesheet" href="/oyya-profiles.css?v=1"><link rel="stylesheet" href="/oyya-social.css?v=1">'.$experienceAsset.'<script defer src="/oyya-nav-gesture.js?v=4"></script><script defer src="/oyya-composer.js?v=2"></script><script defer src="/oyya-themes.js?v=1"></script><script defer src="/oyya-profiles.js?v=1"></script><script defer src="/oyya-social.js?v=2"></script>';
+if(stripos($out,'</head>')!==false)$out=str_ireplace('</head>',$assets.'</head>',$out);echo $out;
