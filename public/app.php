@@ -4,6 +4,7 @@ session_start();
 
 const OYYA_MAX_USERS = 20;
 const OYYA_DATA_DIR = __DIR__ . '/data';
+const OYYA_SYSTEM_USER_ID = 'oyya-system';
 
 function oyya_path(string $name): string { return OYYA_DATA_DIR . '/' . $name . '.json'; }
 function oyya_boot(): void {
@@ -17,19 +18,26 @@ function oyya_write(string $name,array $rows): bool { oyya_boot(); return file_p
 function oyya_id(): string { return bin2hex(random_bytes(8)); }
 function oyya_now(): string { return date(DATE_ATOM); }
 function oyya_users(): array { return oyya_read('users'); }
+function oyya_test_users(): array { return array_values(array_filter(oyya_users(),fn($u)=>empty($u['system']))); }
 function oyya_save_users(array $u): bool { return oyya_write('users',$u); }
 function oyya_user_by_id(string $id): ?array { foreach(oyya_users() as $u) if(($u['id']??'')===$id)return $u; return null; }
 function oyya_normalize_phone(string $phone): string { $phone=preg_replace('/[^0-9+]/','',trim($phone))??''; if(str_starts_with($phone,'00218'))$phone='+218'.substr($phone,5); if(str_starts_with($phone,'218'))$phone='+'.$phone; return $phone; }
 function oyya_valid_libyan_phone(string $phone): bool { return (bool)preg_match('/^(?:\+2189|09)[0-9]{8}$/',$phone); }
 function oyya_current_user(): ?array { return empty($_SESSION['oyya_uid'])?null:oyya_user_by_id((string)$_SESSION['oyya_uid']); }
+function oyya_seed_system_user(): void {
+    $users=oyya_users();
+    foreach($users as $u) if(($u['id']??'')===OYYA_SYSTEM_USER_ID) return;
+    $users[]=['id'=>OYYA_SYSTEM_USER_ID,'name'=>'OYYA','phone'=>'','password_hash'=>'','city'=>'ليبيا','skills'=>'OYYA','interests'=>'ليبيا، المجتمع، الفرص، الأحداث','study_work'=>'الحساب الرسمي لـ OYYA','hobbies'=>'','offers'=>'اكتشاف ما يحدث حولك','seeks'=>'','bio'=>'الحساب الرسمي داخل عالم OYYA.','location_visibility'=>'hidden','verified'=>true,'system'=>true,'created_at'=>oyya_now()];
+    oyya_save_users($users);
+}
 function oyya_register(array $in): array {
     $name=trim((string)($in['name']??''));$phone=oyya_normalize_phone((string)($in['phone']??''));$pw=(string)($in['password']??'');$city=trim((string)($in['city']??''));
     if(mb_strlen($name)<2)return[false,'اكتب اسمك الحقيقي.']; if(!oyya_valid_libyan_phone($phone))return[false,'اكتب رقم هاتف ليبي صحيح.']; if(strlen($pw)<6)return[false,'كلمة المرور يجب ألا تقل عن 6 خانات.']; if($city==='')return[false,'اختر مدينتك.'];
-    $users=oyya_users(); if(count($users)>=OYYA_MAX_USERS)return[false,'اكتملت مساحة الاختبار الحالية (20 مستخدمًا).']; foreach($users as $u)if(($u['phone']??'')===$phone)return[false,'هذا الرقم مسجل بالفعل.'];
-    $id=oyya_id();$users[]=['id'=>$id,'name'=>$name,'phone'=>$phone,'password_hash'=>password_hash($pw,PASSWORD_DEFAULT),'city'=>$city,'skills'=>'','interests'=>'','study_work'=>'','hobbies'=>'','offers'=>'','seeks'=>'','bio'=>'','location_visibility'=>'approx','verified'=>false,'created_at'=>oyya_now()];
+    $users=oyya_users(); if(count(oyya_test_users())>=OYYA_MAX_USERS)return[false,'اكتملت مساحة الاختبار الحالية (20 مستخدمًا).']; foreach($users as $u)if(($u['phone']??'')===$phone)return[false,'هذا الرقم مسجل بالفعل.'];
+    $id=oyya_id();$users[]=['id'=>$id,'name'=>$name,'phone'=>$phone,'password_hash'=>password_hash($pw,PASSWORD_DEFAULT),'city'=>$city,'skills'=>'','interests'=>'','study_work'=>'','hobbies'=>'','offers'=>'','seeks'=>'','bio'=>'','location_visibility'=>'approx','verified'=>false,'system'=>false,'created_at'=>oyya_now()];
     if(!oyya_save_users($users))return[false,'تعذر حفظ الحساب الآن.'];$_SESSION['oyya_uid']=$id;session_regenerate_id(true);return[true,'تم إنشاء الحساب.'];
 }
-function oyya_login(array $in): array { $p=oyya_normalize_phone((string)($in['phone']??''));$pw=(string)($in['password']??'');foreach(oyya_users() as $u){if(($u['phone']??'')===$p&&password_verify($pw,(string)($u['password_hash']??''))){$_SESSION['oyya_uid']=$u['id'];session_regenerate_id(true);return[true,'تم تسجيل الدخول.'];}}return[false,'رقم الهاتف أو كلمة المرور غير صحيحة.']; }
+function oyya_login(array $in): array { $p=oyya_normalize_phone((string)($in['phone']??''));$pw=(string)($in['password']??'');foreach(oyya_users() as $u){if(!empty($u['system']))continue;if(($u['phone']??'')===$p&&password_verify($pw,(string)($u['password_hash']??''))){$_SESSION['oyya_uid']=$u['id'];session_regenerate_id(true);return[true,'تم تسجيل الدخول.'];}}return[false,'رقم الهاتف أو كلمة المرور غير صحيحة.']; }
 function oyya_logout(): void { $_SESSION=[]; if(ini_get('session.use_cookies')){$p=session_get_cookie_params();setcookie(session_name(),'',time()-42000,$p['path'],$p['domain'],$p['secure'],$p['httponly']);}session_destroy(); }
 function oyya_profile_update(string $uid,array $in): array { $users=oyya_users(); foreach($users as &$u){if(($u['id']??'')===$uid){foreach(['skills','interests','study_work','hobbies','offers','seeks','bio'] as $k)$u[$k]=trim((string)($in[$k]??''));$u['location_visibility']=in_array(($in['location_visibility']??'approx'),['hidden','city','approx'],true)?$in['location_visibility']:'approx';oyya_save_users($users);return[true,'تم حفظ ملفك.'];}}return[false,'الحساب غير موجود.']; }
 function oyya_notify(string $uid,string $text,string $type='activity'): void { $n=oyya_read('notifications');$n[]=['id'=>oyya_id(),'user_id'=>$uid,'text'=>$text,'type'=>$type,'read'=>false,'created_at'=>oyya_now()];oyya_write('notifications',$n); }
@@ -45,3 +53,6 @@ function oyya_is_following(string $uid,string $target): bool { foreach(oyya_read
 function oyya_is_saved(string $uid,string $post): bool { foreach(oyya_read('saves') as $x)if(($x['user_id']??'')===$uid&&($x['post_id']??'')===$post)return true;return false; }
 function oyya_post_likes(string $post): int { $n=0;foreach(oyya_read('likes') as $x)if(($x['post_id']??'')===$post)$n++;return $n; }
 function oyya_post_comments(string $post): array { return array_values(array_filter(oyya_read('comments'),fn($x)=>($x['post_id']??'')===$post)); }
+
+oyya_boot();
+oyya_seed_system_user();
