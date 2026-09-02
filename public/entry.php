@@ -13,6 +13,6 @@ file_put_contents($tmp,$source,LOCK_EX);
 ob_start();
 require $tmp;
 $out=(string)ob_get_clean();
-$assets='<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.7.0/dist/maplibre-gl.css"><link rel="stylesheet" href="/oyya-experience.css?v=2"><script defer src="https://unpkg.com/maplibre-gl@5.7.0/dist/maplibre-gl.js"></script><script defer src="/oyya-experience.js?v=4"></script><script defer src="/oyya-vector-map.js?v=1"></script><script defer src="/oyya-nav-gesture.js?v=2"></script>';
+$assets='<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.7.0/dist/maplibre-gl.css"><link rel="stylesheet" href="/oyya-experience.css?v=2"><script defer src="https://unpkg.com/maplibre-gl@5.7.0/dist/maplibre-gl.js"></script><script defer src="/oyya-experience.js?v=4"></script><script defer src="/oyya-vector-map.js?v=1"></script><script defer src="/oyya-nav-gesture.js?v=2"></script><script defer src="/oyya-composer.js?v=1"></script>';
 if(stripos($out,'</head>')!==false)$out=str_ireplace('</head>',$assets.'</head>',$out);
 echo $out;
