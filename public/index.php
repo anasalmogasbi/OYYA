@@ -1,24 +1,37 @@
 <?php
 declare(strict_types=1);
-header('Content-Type: text/html; charset=UTF-8');
+require __DIR__ . '/app.php';
+
+$message = '';
+$error = false;
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $action = (string)($_POST['action'] ?? '');
+    if ($action === 'register') {
+        [$ok, $message] = oyya_register($_POST);
+        $error = !$ok;
+        if ($ok) { header('Location: /'); exit; }
+    } elseif ($action === 'login') {
+        [$ok, $message] = oyya_login($_POST);
+        $error = !$ok;
+        if ($ok) { header('Location: /'); exit; }
+    } elseif ($action === 'logout') {
+        oyya_logout(); header('Location: /'); exit;
+    }
+}
+$user = oyya_current_user();
+$usersCount = count(oyya_users());
+$remaining = max(0, OYYA_MAX_USERS - $usersCount);
 ?><!doctype html>
-<html lang="ar" dir="rtl">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#111827">
-  <title>OYYA — عالمك حولك</title>
-  <link rel="manifest" href="/manifest.webmanifest">
-  <style>
-    *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0b1020;color:#f8fafc;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.wrap{width:min(92vw,760px);padding:48px 28px;text-align:center}.brand{font-size:clamp(54px,10vw,96px);font-weight:900;letter-spacing:.04em}.tag{font-size:clamp(24px,4vw,38px);font-weight:800;margin-top:8px}.status{margin:36px auto 0;padding:18px 22px;border:1px solid rgba(255,255,255,.12);border-radius:20px;background:rgba(255,255,255,.06);max-width:560px;line-height:1.8;color:#cbd5e1}.dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#22c55e;margin-left:8px;box-shadow:0 0 18px #22c55e}
-  </style>
-</head>
-<body>
-  <main class="wrap">
-    <div class="brand">OYYA</div>
-    <div class="tag">عالمك حولك</div>
-    <div class="status"><span class="dot"></span>البنية الحية متصلة وجاهزة للبناء.</div>
-  </main>
-  <script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));}</script>
-</body>
-</html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#07101f"><title>OYYA — عالمك حولك</title><link rel="manifest" href="/manifest.webmanifest"><style>
+*{box-sizing:border-box}body{margin:0;background:#07101f;color:#f8fafc;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh}.shell{width:min(1120px,94%);margin:auto}.top{height:72px;display:flex;align-items:center;justify-content:space-between}.brand{font-size:32px;font-weight:1000;letter-spacing:2px}.muted{color:#94a3b8}.hero{min-height:calc(100vh - 72px);display:grid;grid-template-columns:1fr 440px;gap:60px;align-items:center}.hero h1{font-size:clamp(44px,7vw,82px);margin:0 0 12px;line-height:1}.hero p{font-size:22px;color:#cbd5e1;line-height:1.8}.card{background:#111b2d;border:1px solid #26344d;border-radius:28px;padding:28px;box-shadow:0 30px 80px #0005}.tabs{display:flex;background:#091323;border-radius:14px;padding:5px;margin-bottom:22px}.tab{flex:1;padding:11px;border:0;border-radius:10px;background:transparent;color:#94a3b8;font-weight:800;cursor:pointer}.tab.on{background:#1e293b;color:white}.form{display:none}.form.on{display:block}.field{margin:12px 0}.field label{display:block;margin-bottom:7px;color:#cbd5e1;font-size:14px}.field input,.field select{width:100%;padding:14px 15px;border-radius:13px;border:1px solid #334155;background:#091323;color:white;font:inherit;outline:none}.field input:focus,.field select:focus{border-color:#38bdf8}.btn{width:100%;border:0;border-radius:14px;padding:15px;background:#f8fafc;color:#07101f;font-weight:1000;font-size:16px;cursor:pointer;margin-top:10px}.notice{padding:12px 14px;border-radius:12px;margin-bottom:14px;background:#172033;color:#cbd5e1}.notice.err{background:#3b1720;color:#fecdd3}.capacity{margin-top:16px;text-align:center;color:#94a3b8;font-size:13px}.world{padding:24px 0 90px}.welcome{display:flex;justify-content:space-between;align-items:center;gap:20px;margin:24px 0}.welcome h1{margin:0}.nav{display:flex;gap:8px;overflow:auto;padding-bottom:8px}.pill{white-space:nowrap;padding:11px 16px;border-radius:999px;background:#111b2d;border:1px solid #26344d}.pill.active{background:#f8fafc;color:#07101f}.grid{display:grid;grid-template-columns:240px minmax(0,1fr) 280px;gap:18px;margin-top:20px}.panel{background:#111b2d;border:1px solid #26344d;border-radius:22px;padding:20px}.composer textarea{width:100%;min-height:100px;background:#091323;border:1px solid #334155;border-radius:16px;color:white;padding:15px;font:inherit;resize:vertical}.placeholder{padding:35px 15px;text-align:center;color:#94a3b8;border:1px dashed #334155;border-radius:18px;margin-top:15px}.sideTitle{font-weight:900;margin-bottom:12px}.sideItem{padding:11px 0;border-bottom:1px solid #26344d;color:#cbd5e1}.logout{background:none;border:1px solid #334155;color:#cbd5e1;border-radius:12px;padding:9px 14px;cursor:pointer}@media(max-width:850px){.hero{grid-template-columns:1fr;gap:24px;padding:35px 0}.heroIntro{text-align:center}.card{width:min(100%,500px);margin:auto}.grid{grid-template-columns:1fr}.side{display:none}.top{height:60px}.world{padding-top:5px}}
+</style></head><body><div class="shell">
+<?php if (!$user): ?>
+<header class="top"><div class="brand">OYYA</div><div class="muted">عالمك حولك</div></header><main class="hero"><section class="heroIntro"><h1>ليبيا أقرب.</h1><p>أشخاص، اهتمامات، فرص وأحداث حولك.<br>العالم يبدأ بأهله.</p></section><section class="card">
+<?php if($message): ?><div class="notice <?=$error?'err':''?>"><?=htmlspecialchars($message)?></div><?php endif; ?>
+<div class="tabs"><button class="tab on" data-target="register">حساب جديد</button><button class="tab" data-target="login">دخول</button></div>
+<form class="form on" id="register" method="post"><input type="hidden" name="action" value="register"><div class="field"><label>الاسم</label><input name="name" required maxlength="60" autocomplete="name"></div><div class="field"><label>رقم الهاتف الليبي</label><input name="phone" required inputmode="tel" placeholder="09xxxxxxxx" autocomplete="tel"></div><div class="field"><label>المدينة</label><select name="city" required><option value="">اختر المدينة</option><option>بنغازي</option><option>طرابلس</option><option>مصراتة</option><option>البيضاء</option><option>درنة</option><option>سبها</option><option>طبرق</option><option>الزاوية</option><option>سرت</option><option>مدينة أخرى</option></select></div><div class="field"><label>كلمة المرور</label><input type="password" name="password" required minlength="6" autocomplete="new-password"></div><button class="btn">ادخل عالم OYYA</button></form>
+<form class="form" id="login" method="post"><input type="hidden" name="action" value="login"><div class="field"><label>رقم الهاتف</label><input name="phone" required inputmode="tel" autocomplete="tel"></div><div class="field"><label>كلمة المرور</label><input type="password" name="password" required autocomplete="current-password"></div><button class="btn">دخول</button></form>
+<div class="capacity">مرحلة الاختبار: <?=$usersCount?> من 20 مسجلين · <?=$remaining?> مساحة متبقية</div></section></main>
+<?php else: ?>
+<header class="top"><div class="brand">OYYA</div><form method="post"><input type="hidden" name="action" value="logout"><button class="logout">خروج</button></form></header><main class="world"><div class="welcome"><div><div class="muted">مرحبًا</div><h1><?=htmlspecialchars($user['name'])?></h1></div><div class="muted"><?=htmlspecialchars($user['city'])?></div></div><nav class="nav"><div class="pill active">لك</div><div class="pill">أتابع</div><div class="pill">حولك</div><div class="pill">الأشخاص</div><div class="pill">الخريطة</div><div class="pill">المجتمعات</div><div class="pill">الأحداث</div></nav><div class="grid"><aside class="panel side"><div class="sideTitle">عالمك</div><div class="sideItem">ملفي الشخصي</div><div class="sideItem">المحفوظات</div><div class="sideItem">الفرص</div><div class="sideItem">الألعاب</div></aside><section class="panel"><div class="composer"><textarea placeholder="ماذا يحدث حولك؟"></textarea><button class="btn" type="button">نشر</button></div><div class="placeholder">هذه نقطة البداية الحية. المحتوى الذي ينشئه المستخدمون سيظهر هنا.</div></section><aside class="panel side"><div class="sideTitle">حولك الآن</div><div class="sideItem"><?=$usersCount?> مستخدم في الاختبار</div><div class="sideItem">اكتشف أشخاصًا واهتمامات قريبة</div><div class="sideItem">الأحداث والأماكن ستظهر هنا</div></aside></div></main>
+<?php endif; ?></div><script>document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));document.querySelectorAll('.form').forEach(x=>x.classList.remove('on'));b.classList.add('on');document.getElementById(b.dataset.target).classList.add('on')});if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));</script></body></html>
