@@ -10,7 +10,12 @@
   style.textContent=`
     .nav{display:none!important}
     .shell>header.top,.top.oyya-legacy-top{display:none!important}
-    .oyya-top-actions{position:relative}
+    .oyya-top-actions{position:relative;display:flex;align-items:center;gap:8px}
+    .oyya-top-search{height:38px;width:220px;display:flex;align-items:center;gap:7px;background:#f1f2f4;border:1px solid #e4e6e9;border-radius:999px;padding:0 12px;direction:rtl;transition:.18s ease}
+    .oyya-top-search:focus-within{background:#fff;border-color:#cfd3d8;box-shadow:0 0 0 3px #00000008}
+    .oyya-top-search svg{width:17px;height:17px;flex:0 0 auto;fill:none;stroke:#626971;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+    .oyya-top-search input{min-width:0;flex:1;border:0!important;outline:0!important;background:transparent!important;box-shadow:none!important;color:#17191d!important;font:500 13px/1.2 Tahoma,'Segoe UI',Arial,sans-serif!important;padding:0!important;height:auto!important;text-align:right}
+    .oyya-top-search input::placeholder{color:#8a9098}
     .oyya-ui-popover{position:absolute;top:48px;left:0;width:min(340px,calc(100vw - 28px));background:#fff;border:1px solid #e4e6e9;border-radius:18px;box-shadow:0 18px 55px #0002;padding:10px;z-index:180;display:none;direction:rtl;color:#17191d}
     .oyya-ui-popover.is-open{display:block}
     .oyya-ui-popover h3{margin:4px 6px 10px;font-size:17px}
@@ -31,6 +36,8 @@
     .oyya-track.is-playing{background:#f3f4f6}
     .oyya-now-playing{padding:9px 10px;margin-bottom:8px;border-radius:14px;background:linear-gradient(115deg,#2410a8,#0877dc 28%,#09d7ef 49%,#7d63e8 70%,#e51bc4);color:#fff;display:none}
     .oyya-now-playing.is-on{display:block}
+    @media(max-width:620px){.oyya-top-search{width:150px;padding:0 10px}.oyya-top-search input{font-size:12px!important}.oyya-reference-brand small{display:none!important}}
+    @media(max-width:460px){.oyya-top-search{width:118px}.oyya-top-search input::placeholder{font-size:0}.oyya-top-search input::placeholder{color:transparent}}
   `;
   document.head.appendChild(style);
 
@@ -48,6 +55,14 @@
 
   const topActions=qs('.oyya-top-actions');
   if(topActions){
+    const searchLink=qsa('.oyya-circle',topActions).find(a=>(a.getAttribute('href')||'').includes('explore'));
+    if(searchLink){
+      const searchForm=document.createElement('form');searchForm.className='oyya-top-search';searchForm.setAttribute('role','search');searchForm.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg><input type="search" name="q" autocomplete="off" placeholder="ابحث في OYYA" aria-label="بحث في OYYA">';
+      const input=qs('input',searchForm);input.value=params.get('q')||'';
+      searchForm.addEventListener('submit',e=>{e.preventDefault();const q=input.value.trim();location.href='/?view=explore'+(q?'&q='+encodeURIComponent(q):'')});
+      searchLink.replaceWith(searchForm);
+    }
+
     const closeTopMenus=except=>qsa('.oyya-ui-popover',topActions).forEach(p=>{if(p!==except)p.classList.remove('is-open')});
     const wireMenu=(button,pop)=>button.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();const willOpen=!pop.classList.contains('is-open');closeTopMenus(pop);pop.classList.toggle('is-open',willOpen)});
     const links=qsa('.oyya-circle',topActions);
