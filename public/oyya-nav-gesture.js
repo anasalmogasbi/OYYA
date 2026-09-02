@@ -5,10 +5,8 @@
     const shell=document.querySelector('#oyyaBottomShell');
     const sheet=document.querySelector('#oyyaMoreSheet');
     const backdrop=document.querySelector('#oyyaMoreBackdrop');
-    const close=document.querySelector('#oyyaMoreClose');
     if(!nav||!shell||!sheet)return;
 
-    // Four permanent destinations only: Home, Reels, Event Map, People.
     const smart=nav.querySelector('.oyya-smart-slot');
     if(smart){
       smart.dataset.view='people';
@@ -21,74 +19,56 @@
     }
     const mapLabel=nav.querySelector('[data-view="map"] span:last-child');
     if(mapLabel)mapLabel.textContent='خريطة الأحداث';
-
-    // Music and More no longer occupy permanent navigation slots.
     nav.querySelector('#oyyaRadioNav')?.remove();
     nav.querySelector('#oyyaMoreButton')?.remove();
 
-    // The lower curtain carries every secondary destination, starting with Games.
-    const grid=sheet.querySelector('#oyyaMoreGrid');
-    if(grid)grid.innerHTML='\
-      <a href="/?view=games"><b>الألعاب</b><small>القعدة والطاولات والتحديات</small></a>\
-      <a href="/?view=communities"><b>المجتمعات</b><small>المجموعات ودوائر الاهتمام</small></a>\
-      <a href="/?view=pages"><b>الصفحات والأعمال</b><small>الأنشطة والمعارض والخدمات</small></a>\
-      <a href="/?view=opportunities"><b>الفرص والعمل</b><small>فرص واحتياجات قريبة منك</small></a>\
-      <a href="/?view=events"><b>الأحداث</b><small>الفعاليات الحالية والقادمة</small></a>\
-      <a href="/?view=explore"><b>اكتشف</b><small>بحث وترند ومحتوى جديد</small></a>';
-
-    const head=sheet.querySelector('.oyya-sheet-head');
-    if(head){
-      const title=head.querySelector('strong');if(title)title.textContent='اسحب للتنقل';
-      const sub=head.querySelector('small');if(sub)sub.textContent='باقي عالم OYYA';
-    }
+    const items=[
+      ['games','♠','الألعاب'],
+      ['communities','◌','المجتمعات'],
+      ['pages','▣','الصفحات'],
+      ['opportunities','✦','الفرص'],
+      ['events','◉','الأحداث'],
+      ['explore','⌕','اكتشف'],
+      ['saved','☆','المحفوظات'],
+      ['albums','▧','الألبومات']
+    ];
+    sheet.innerHTML='<div class="oyya-expand-grip"></div><div class="oyya-expand-grid"></div>';
+    const grid=sheet.querySelector('.oyya-expand-grid');
+    items.forEach(([view,icon,label])=>{
+      const a=document.createElement('a');
+      a.href='/?view='+view;
+      a.className='oyya-expand-item';
+      a.innerHTML='<span class="oyya-expand-icon">'+icon+'</span><span class="oyya-expand-label">'+label+'</span>';
+      grid.appendChild(a);
+    });
 
     const style=document.createElement('style');
     style.textContent=`
-      #oyyaBottomShell{touch-action:none;user-select:none;z-index:120!important;border-radius:0!important}
-      #oyyaSmartNav{display:grid!important;grid-template-columns:repeat(4,1fr)!important;width:100%!important}
+      #oyyaBottomShell{touch-action:none;user-select:none;z-index:120!important;border-radius:0!important;background:#fff!important;transition:height .28s cubic-bezier(.2,.8,.2,1),box-shadow .28s!important;overflow:visible!important}
+      #oyyaSmartNav{display:grid!important;grid-template-columns:repeat(4,1fr)!important;width:100%!important;height:72px!important;position:relative!important;z-index:2!important;background:#fff!important}
       #oyyaSmartNav>.oyya-nav-item{width:auto!important;max-width:none!important;flex:none!important}
-      #oyyaMoreSheet{z-index:119!important;bottom:72px!important;width:min(760px,100%)!important;max-height:min(66vh,560px)!important;padding:8px 14px 18px!important;border-radius:25px 25px 0 0!important;will-change:transform;transition:transform .28s cubic-bezier(.2,.8,.2,1);touch-action:none;box-shadow:0 -12px 38px #0002!important}
-      #oyyaMoreSheet.oyya-dragging{transition:none!important}
-      #oyyaMoreSheet .oyya-sheet-grip{width:54px!important;height:5px!important;cursor:grab;margin-top:2px!important}
-      #oyyaMoreBackdrop{z-index:118!important}
-      #oyyaBottomShell:before{content:'';position:absolute;top:4px;left:50%;transform:translateX(-50%);width:34px;height:3px;border-radius:999px;background:#d8dbe0;opacity:.9;pointer-events:none}
+      #oyyaBottomShell:before{content:'';position:absolute;top:4px;left:50%;transform:translateX(-50%);width:34px;height:3px;border-radius:999px;background:#d8dbe0;z-index:4;pointer-events:none}
+      #oyyaMoreBackdrop{display:none!important}
+      #oyyaMoreSheet{position:fixed!important;left:50%!important;bottom:72px!important;transform:translate(-50%,100%)!important;width:min(760px,100%)!important;height:auto!important;max-height:none!important;padding:12px 16px 18px!important;border:0!important;border-radius:24px 24px 0 0!important;background:#fff!important;box-shadow:0 -18px 50px #0002!important;z-index:119!important;opacity:0!important;pointer-events:none!important;transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .18s!important;overflow:hidden!important;touch-action:none!important}
+      #oyyaMoreSheet.is-open{transform:translate(-50%,0)!important;opacity:1!important;pointer-events:auto!important}
+      .oyya-expand-grip{width:46px;height:5px;border-radius:999px;background:#d4d7dc;margin:0 auto 16px}
+      .oyya-expand-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px 10px;padding:4px 0 2px}
+      .oyya-expand-item{text-decoration:none;color:#17191d;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:7px;min-width:0}
+      .oyya-expand-icon{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:#f0f2f4;border:1px solid #e3e6e9;font-size:22px;font-weight:800}
+      .oyya-expand-label{font:700 11px/1.35 Tahoma,'Segoe UI',Arial,sans-serif;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:78px}
+      body.oyya-drawer-open #oyyaBottomShell{box-shadow:0 -10px 30px #00000010!important}
       body.oyya-drawer-open #oyyaBottomShell:before{background:#858b94}
-      @media(min-width:800px){#oyyaMoreSheet{bottom:72px!important}}
+      @media(max-width:520px){.oyya-expand-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:16px 6px}.oyya-expand-icon{width:44px;height:44px}.oyya-expand-label{font-size:10px;max-width:68px}}
     `;
     document.head.appendChild(style);
 
-    const open=()=>{
-      sheet.classList.add('is-open');
-      sheet.setAttribute('aria-hidden','false');
-      if(backdrop)backdrop.hidden=false;
-      document.body.classList.add('oyya-drawer-open');
-      sheet.style.transform='';
-    };
-    const shut=()=>{
-      sheet.classList.remove('is-open');
-      sheet.setAttribute('aria-hidden','true');
-      if(backdrop)backdrop.hidden=true;
-      document.body.classList.remove('oyya-drawer-open');
-      sheet.style.transform='';
-    };
-    if(close)close.onclick=shut;
-    if(backdrop)backdrop.onclick=shut;
+    const open=()=>{sheet.classList.add('is-open');sheet.setAttribute('aria-hidden','false');document.body.classList.add('oyya-drawer-open');};
+    const shut=()=>{sheet.classList.remove('is-open');sheet.setAttribute('aria-hidden','true');document.body.classList.remove('oyya-drawer-open');sheet.style.transform='';};
 
     let startY=0,lastY=0,dragging=false,fromSheet=false;
-    const begin=(y,isSheet)=>{startY=lastY=y;dragging=true;fromSheet=isSheet;if(isSheet)sheet.classList.add('oyya-dragging');};
-    const move=y=>{
-      if(!dragging)return;
-      lastY=y;
-      const dy=y-startY;
-      if(fromSheet&&sheet.classList.contains('is-open')&&dy>0)sheet.style.transform=`translate(-50%, ${Math.min(dy,240)}px)`;
-    };
-    const end=()=>{
-      if(!dragging)return;
-      const dy=lastY-startY;
-      if(fromSheet){sheet.classList.remove('oyya-dragging');sheet.style.transform='';if(dy>60)shut();}
-      else if(dy<-38)open();
-      dragging=false;
-    };
+    const begin=(y,isSheet)=>{startY=lastY=y;dragging=true;fromSheet=isSheet;};
+    const move=y=>{if(!dragging)return;lastY=y;};
+    const end=()=>{if(!dragging)return;const dy=lastY-startY;if(fromSheet){if(dy>38)shut();}else if(dy<-34)open();dragging=false;};
 
     shell.addEventListener('touchstart',e=>{if(e.touches[0])begin(e.touches[0].clientY,false)},{passive:true});
     shell.addEventListener('touchmove',e=>{if(e.touches[0])move(e.touches[0].clientY)},{passive:true});
@@ -96,14 +76,11 @@
     sheet.addEventListener('touchstart',e=>{if(e.touches[0])begin(e.touches[0].clientY,true)},{passive:true});
     sheet.addEventListener('touchmove',e=>{if(e.touches[0])move(e.touches[0].clientY)},{passive:true});
     sheet.addEventListener('touchend',end,{passive:true});
-
-    // Desktop/pen testing uses the same physical gesture on the bar itself.
     shell.addEventListener('pointerdown',e=>{if(e.pointerType!=='touch'){begin(e.clientY,false);shell.setPointerCapture?.(e.pointerId)}});
     shell.addEventListener('pointermove',e=>{if(dragging&&!fromSheet)move(e.clientY)});
     shell.addEventListener('pointerup',end);
-    const grip=sheet.querySelector('.oyya-sheet-grip');
-    grip?.addEventListener('pointerdown',e=>{begin(e.clientY,true);grip.setPointerCapture?.(e.pointerId)});
-    grip?.addEventListener('pointermove',e=>{if(dragging&&fromSheet)move(e.clientY)});
-    grip?.addEventListener('pointerup',end);
+    sheet.addEventListener('pointerdown',e=>{if(e.pointerType!=='touch'){begin(e.clientY,true);sheet.setPointerCapture?.(e.pointerId)}});
+    sheet.addEventListener('pointermove',e=>{if(dragging&&fromSheet)move(e.clientY)});
+    sheet.addEventListener('pointerup',end);
   },80));
 })();
