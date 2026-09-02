@@ -1,0 +1,1 @@
+(()=>{const v=new URLSearchParams(location.search).get('view')||'feed';document.body.classList.add('oyya-view-'+v);if(v!=='feed')document.querySelectorAll('.oyya-exp-tabs,.oyya-publish-launcher,.oyya-exp-composer,.oyya-exp-posts').forEach(x=>x.remove());if(v==='reels'){document.querySelectorAll('.oyya-reference-top,.welcome,.side').forEach(x=>x.style.display='none');}})();
