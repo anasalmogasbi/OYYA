@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 ob_start();
-require __DIR__ . '/main.php';
+require __DIR__ . '/entry.php';
 $html = (string)ob_get_clean();
 
 $headInject = "\n<link rel=\"stylesheet\" href=\"/oyya-ui.css?v=1\">\n";
