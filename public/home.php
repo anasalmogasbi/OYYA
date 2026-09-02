@@ -7,11 +7,62 @@ $html = (string)ob_get_clean();
 
 $view=preg_replace('/[^a-z_]/','',(string)($_GET['view']??'feed')) ?: 'feed';
 $logged=!empty($_SESSION['oyya_uid']);
-$headInject = "\n<link rel=\"stylesheet\" href=\"/oyya-ui.css?v=3\">\n";
+$headInject = "\n<link rel=\"stylesheet\" href=\"/oyya-ui.css?v=4\">\n" . (!$logged ? "<link rel=\"stylesheet\" href=\"/oyya-auth.css?v=1\">\n" : '');
 
-$top='';
-if($logged){
-  $top=<<<'HTML'
+if(!$logged){
+  $message=''; $error=false;
+  if(preg_match('/<div class="notice([^\"]*)">(.*?)<\/div>/s',$html,$m)){$message=strip_tags($m[2]);$error=str_contains($m[1],'err');}
+  $usersCount=0;$remaining=20;
+  if(preg_match('/الاختبار الحي:\s*(\d+)\s*من\s*20\s*·\s*(\d+)/u',$html,$m)){$usersCount=(int)$m[1];$remaining=(int)$m[2];}
+  $cities=['بنغازي','طرابلس','مصراتة','البيضاء','درنة','سبها','طبرق','الزاوية','سرت','مدينة أخرى'];
+  $opts='<option value="">اختر المدينة</option>'; foreach($cities as $c)$opts.='<option>'.htmlspecialchars($c,ENT_QUOTES,'UTF-8').'</option>';
+  $notice=$message!==''?'<div class="oyya-auth-notice'.($error?' err':'').'">'.htmlspecialchars($message,ENT_QUOTES,'UTF-8').'</div>':'';
+  $auth=<<<HTML
+<div class="oyya-auth-splash" id="oyyaAuthSplash"><div class="oyya-splash-mark"><div class="oyya-splash-logo">OYYA</div><div class="oyya-splash-title">OYYA</div></div></div>
+<main class="oyya-auth-page">
+  <section class="oyya-auth-panel">
+    <div class="oyya-auth-box">
+      <div class="oyya-auth-brand-mobile">OYYA</div>
+      {$notice}
+      <h2 class="oyya-auth-heading">ادخل إلى عالمك</h2>
+      <div class="oyya-auth-tabs"><button type="button" class="on" data-auth-target="login">تسجيل الدخول</button><button type="button" data-auth-target="register">إنشاء حساب جديد</button></div>
+      <form class="oyya-auth-form on" id="oyyaAuthLogin" method="post">
+        <input type="hidden" name="action" value="login">
+        <div class="oyya-auth-field"><input name="phone" required inputmode="tel" autocomplete="tel" placeholder="رقم الهاتف الليبي"></div>
+        <div class="oyya-auth-field"><input type="password" name="password" required autocomplete="current-password" placeholder="كلمة المرور"></div>
+        <button class="oyya-auth-submit">تسجيل الدخول</button>
+        <button type="button" class="oyya-auth-switch" data-open-register>إنشاء حساب جديد</button>
+      </form>
+      <form class="oyya-auth-form" id="oyyaAuthRegister" method="post">
+        <input type="hidden" name="action" value="register">
+        <div class="oyya-auth-field"><input name="name" required maxlength="60" autocomplete="name" placeholder="الاسم"></div>
+        <div class="oyya-auth-field"><input name="phone" required inputmode="tel" autocomplete="tel" placeholder="09xxxxxxxx"></div>
+        <div class="oyya-auth-field"><select name="city" required>{$opts}</select></div>
+        <div class="oyya-auth-field"><input type="password" name="password" required minlength="6" autocomplete="new-password" placeholder="كلمة المرور"></div>
+        <button class="oyya-auth-submit">ادخل عالم OYYA</button>
+      </form>
+      <div class="oyya-auth-capacity">الاختبار الحي: {$usersCount} من 20 · {$remaining} مساحة متبقية</div>
+    </div>
+  </section>
+  <section class="oyya-auth-visual">
+    <div class="oyya-auth-logo">OYYA</div>
+    <div class="oyya-auth-visual-inner">
+      <div class="oyya-auth-copy"><h1><span>ليبيا</span><span>أقرب.</span></h1><p>اكتشف الأشخاص، الاهتمامات، الفرص، الأحداث، الأعمال، الألعاب والصوت في عالم ليبي واحد.</p></div>
+      <div class="oyya-auth-art"><div class="oyya-art-card one"><div class="oyya-art-person"></div></div><div class="oyya-art-card two"></div><div class="oyya-art-card three"></div><div class="oyya-art-bubble a">♥</div><div class="oyya-art-bubble b">✦</div></div>
+    </div>
+    <div class="oyya-auth-tag">عالمك حولك</div>
+  </section>
+</main>
+<script>
+(()=>{document.body.classList.add('oyya-auth-mode');const splash=document.getElementById('oyyaAuthSplash');const done=()=>setTimeout(()=>splash?.classList.add('is-done'),420);if(document.readyState==='complete')done();else addEventListener('load',done,{once:true});setTimeout(()=>splash?.classList.add('is-done'),1200);const tabs=[...document.querySelectorAll('[data-auth-target]')],login=document.getElementById('oyyaAuthLogin'),reg=document.getElementById('oyyaAuthRegister');const show=v=>{tabs.forEach(x=>x.classList.toggle('on',x.dataset.authTarget===v));login?.classList.toggle('on',v==='login');reg?.classList.toggle('on',v==='register')};tabs.forEach(x=>x.addEventListener('click',()=>show(x.dataset.authTarget)));document.querySelector('[data-open-register]')?.addEventListener('click',()=>show('register'));})();
+</script>
+HTML;
+  if (stripos($html, '</head>') !== false) $html = str_ireplace('</head>', $headInject . '</head>', $html);
+  $html=preg_replace('/<body([^>]*)>.*?<\/body>/is','<body$1>'.$auth.'</body>',$html,1) ?? $html;
+  echo $html; exit;
+}
+
+$top=<<<'HTML'
 <div class="oyya-reference-top">
   <div class="oyya-reference-brand"><b>OYYA</b><small>عالمك حولك</small></div>
   <div class="oyya-top-actions">
@@ -21,48 +72,16 @@ if($logged){
   </div>
 </div>
 HTML;
-}
 
 $bodyInject = <<<'HTML'
-<div class="oyya-bottom-shell" id="oyyaBottomShell" aria-label="تنقل OYYA">
-  <nav class="oyya-bottom-nav" id="oyyaSmartNav">
-    <a class="oyya-nav-item" data-view="feed" href="/?view=feed"><span class="oyya-nav-icon">⌂</span><span>الرئيسية</span></a>
-    <a class="oyya-nav-item" data-view="reels" href="/?view=reels"><span class="oyya-nav-icon">▶</span><span>ريلز</span></a>
-    <a class="oyya-nav-item" data-view="map" href="/?view=map"><span class="oyya-nav-icon">⌖</span><span>حولك</span></a>
-    <a class="oyya-nav-item oyya-smart-slot" data-view="explore" href="/?view=explore"><span class="oyya-nav-icon">✦</span><span class="oyya-smart-label">اكتشف</span></a>
-    <button class="oyya-nav-item oyya-radio-nav" type="button" id="oyyaRadioNav"><span class="oyya-nav-icon">♫</span><span>تشغيل</span></button>
-    <button class="oyya-nav-item" type="button" id="oyyaMoreButton" aria-expanded="false"><span class="oyya-nav-icon">•••</span><span>المزيد</span></button>
-  </nav>
-</div>
-<div class="oyya-more-backdrop" id="oyyaMoreBackdrop" hidden></div>
-<section class="oyya-more-sheet" id="oyyaMoreSheet" aria-hidden="true" aria-label="المزيد من OYYA">
-  <div class="oyya-sheet-grip" aria-hidden="true"></div>
-  <div class="oyya-sheet-head"><div><strong>عالم OYYA</strong><small>المسارات الإضافية داخل العالم</small></div><button type="button" id="oyyaMoreClose" aria-label="إغلاق">×</button></div>
-  <div class="oyya-more-grid" id="oyyaMoreGrid">
-    <a href="/?view=people" data-view="people"><b>الناس</b><small>حولك، عمل، دراسة، اهتمامات والمواضيع العامة والتعارف</small></a>
-    <a href="/?view=explore" data-view="explore"><b>اكتشف</b><small>بحث وترند وفرص ومجتمعات</small></a>
-    <a href="/?view=nearby" data-view="nearby"><b>منشورات حولك</b><small>محتوى موزع بالمسافة دون كشف موقع الأشخاص</small></a>
-    <a href="/?view=communities" data-view="communities"><b>المجتمعات</b><small>دوائر الاهتمام والمجموعات</small></a>
-    <a href="/?view=events" data-view="events"><b>الأحداث</b><small>ما يحدث الآن والقادم</small></a>
-    <a href="/?view=opportunities" data-view="opportunities"><b>الفرص والعمل</b><small>احتياجات، مهارات وفرص قريبة</small></a>
-    <a href="/?view=games" data-view="games"><b>القعدة والألعاب</b><small>طاولات OYYA وتفاعل مشترك</small></a>
-    <a href="/?view=pages" data-view="pages"><b>الصفحات والأعمال</b><small>متاجر، خدمات ومعارض دائمة</small></a>
-    <a href="/?view=messages" data-view="messages"><b>الرسائل</b><small>تواصل مباشر بسيط</small></a>
-    <a href="/?view=notifications" data-view="notifications"><b>النشاط</b><small>طلبات وتفاعلات وإشعارات</small></a>
-    <a href="/?view=saved" data-view="saved"><b>المحفوظات</b><small>ما حفظته للرجوع إليه</small></a>
-    <a href="/?view=albums" data-view="albums"><b>الألبومات</b><small>صور ووسائط منظمة</small></a>
-    <a href="/?view=memories" data-view="memories"><b>الذكريات</b><small>تاريخك داخل OYYA</small></a>
-    <a href="/?view=profile" data-view="profile"><b>ملفي</b><small>مهاراتي، اهتماماتي، أقدم وأبحث عن</small></a>
-    <a href="/?view=ads" data-view="ads"><b>الإعلانات</b><small>إنشاء وإدارة الحملات التجريبية</small></a>
-  </div>
-</section>
-<script src="/oyya-ui.js?v=3" defer></script>
+<div class="oyya-bottom-shell" id="oyyaBottomShell" aria-label="تنقل OYYA"><nav class="oyya-bottom-nav" id="oyyaSmartNav">
+<a class="oyya-nav-item" data-view="feed" href="/?view=feed"><span class="oyya-nav-icon">⌂</span><span>الرئيسية</span></a><a class="oyya-nav-item" data-view="reels" href="/?view=reels"><span class="oyya-nav-icon">▶</span><span>ريلز</span></a><a class="oyya-nav-item" data-view="map" href="/?view=map"><span class="oyya-nav-icon">⌖</span><span>حولك</span></a><a class="oyya-nav-item oyya-smart-slot" data-view="explore" href="/?view=explore"><span class="oyya-nav-icon">✦</span><span class="oyya-smart-label">اكتشف</span></a><button class="oyya-nav-item oyya-radio-nav" type="button" id="oyyaRadioNav"><span class="oyya-nav-icon">♫</span><span>تشغيل</span></button><button class="oyya-nav-item" type="button" id="oyyaMoreButton" aria-expanded="false"><span class="oyya-nav-icon">•••</span><span>المزيد</span></button></nav></div>
+<div class="oyya-more-backdrop" id="oyyaMoreBackdrop" hidden></div><section class="oyya-more-sheet" id="oyyaMoreSheet" aria-hidden="true"><div class="oyya-sheet-grip"></div><div class="oyya-sheet-head"><div><strong>عالم OYYA</strong><small>المسارات الإضافية داخل العالم</small></div><button type="button" id="oyyaMoreClose">×</button></div><div class="oyya-more-grid" id="oyyaMoreGrid">
+<a href="/?view=people" data-view="people"><b>الناس</b><small>حولك، عمل، دراسة، اهتمامات والتعارف</small></a><a href="/?view=explore" data-view="explore"><b>اكتشف</b><small>بحث وترند وفرص ومجتمعات</small></a><a href="/?view=nearby" data-view="nearby"><b>منشورات حولك</b><small>محتوى موزع بالمسافة</small></a><a href="/?view=communities" data-view="communities"><b>المجتمعات</b><small>دوائر الاهتمام والمجموعات</small></a><a href="/?view=events" data-view="events"><b>الأحداث</b><small>ما يحدث الآن والقادم</small></a><a href="/?view=opportunities" data-view="opportunities"><b>الفرص والعمل</b><small>احتياجات ومهارات وفرص</small></a><a href="/?view=games" data-view="games"><b>القعدة والألعاب</b><small>طاولات وتفاعل مشترك</small></a><a href="/?view=pages" data-view="pages"><b>الصفحات والأعمال</b><small>متاجر وخدمات ومعارض</small></a><a href="/?view=messages" data-view="messages"><b>الرسائل</b><small>تواصل مباشر</small></a><a href="/?view=notifications" data-view="notifications"><b>النشاط</b><small>طلبات وتفاعلات وإشعارات</small></a><a href="/?view=saved" data-view="saved"><b>المحفوظات</b><small>ما حفظته</small></a><a href="/?view=albums" data-view="albums"><b>الألبومات</b><small>صور ووسائط منظمة</small></a><a href="/?view=memories" data-view="memories"><b>الذكريات</b><small>تاريخك داخل OYYA</small></a><a href="/?view=profile" data-view="profile"><b>ملفي</b><small>مهاراتك واهتماماتك</small></a><a href="/?view=ads" data-view="ads"><b>الإعلانات</b><small>الحملات التجريبية</small></a></div></section><script src="/oyya-ui.js?v=4" defer></script>
 HTML;
 
 if (stripos($html, '</head>') !== false) $html = str_ireplace('</head>', $headInject . '</head>', $html);
 $html=preg_replace('/<body([^>]*)>/i','<body$1 class="oyya-view-'.htmlspecialchars($view,ENT_QUOTES,'UTF-8').'">'.$top,$html,1) ?? $html;
-if($logged && stripos($html,'<header class="top">')!==false){
-  $html=str_replace('<header class="top">','<header class="top oyya-legacy-top">',$html);
-}
-if (stripos($html, '</body>') !== false && $logged) $html = str_ireplace('</body>', $bodyInject . '</body>', $html);
+if(stripos($html,'<header class="top">')!==false)$html=str_replace('<header class="top">','<header class="top oyya-legacy-top">',$html);
+if(stripos($html,'</body>')!==false)$html=str_ireplace('</body>',$bodyInject.'</body>',$html);
 echo $html;
