@@ -16,7 +16,6 @@
     .oyya-ui-popover a{display:block;text-decoration:none;color:#17191d;padding:11px 10px;border-radius:12px}
     .oyya-ui-popover a:hover{background:#f3f4f6}
     .oyya-ui-popover small{display:block;color:#858b94;margin-top:3px}
-    .oyya-top-music{font-size:18px!important}
     .oyya-bell-svg,.oyya-music-svg{width:19px;height:19px;display:block;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
     .oyya-music-panel{position:fixed;z-index:190;left:50%;bottom:82px;transform:translateX(-50%);width:min(720px,calc(100% - 20px));max-height:min(70vh,560px);overflow:auto;background:#fff;border:1px solid #e2e4e7;border-radius:22px;box-shadow:0 20px 60px #0003;padding:12px;display:none;direction:rtl}
     .oyya-music-panel.is-open{display:block}
@@ -27,7 +26,7 @@
     .oyya-track.is-playing{background:#f3f4f6}
     .oyya-now-playing{padding:9px 10px;margin-bottom:8px;border-radius:14px;background:linear-gradient(115deg,#2410a8,#0877dc 28%,#09d7ef 49%,#7d63e8 70%,#e51bc4);color:#fff;display:none}
     .oyya-now-playing.is-on{display:block}
-    .oyya-circle[data-oyya-bell],.oyya-circle[data-oyya-music]{cursor:pointer}
+    .oyya-circle[data-oyya-bell]{cursor:pointer}
   `;
   document.head.appendChild(style);
 
@@ -53,10 +52,8 @@
       const pop=document.createElement('div');pop.className='oyya-ui-popover';pop.innerHTML='<h3>الإشعارات</h3><a href="/?view=notifications"><b>فتح مركز الإشعارات</b><small>شاهد النشاط والطلبات والتفاعلات</small></a><a href="/?view=messages"><b>الرسائل</b><small>اذهب مباشرة إلى محادثاتك</small></a>';
       topActions.appendChild(pop);
       oldNotice.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();pop.classList.toggle('is-open')});
-      document.addEventListener('click',e=>{if(!pop.contains(e.target)&&e.target!==oldNotice)pop.classList.remove('is-open')});
+      document.addEventListener('click',e=>{if(!pop.contains(e.target)&&!oldNotice.contains(e.target))pop.classList.remove('is-open')});
     }
-    const musicTop=document.createElement('button');musicTop.type='button';musicTop.className='oyya-circle oyya-top-music';musicTop.dataset.oyyaMusic='1';musicTop.setAttribute('aria-label','الموسيقى');musicTop.innerHTML='<svg class="oyya-music-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l10-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="16" cy="16" r="3"></circle></svg>';
-    const avatar=qs('.oyya-circle.avatar',topActions);topActions.insertBefore(musicTop,avatar||null);
   }
 
   const sheet=qs('#oyyaMoreSheet'),backdrop=qs('#oyyaMoreBackdrop'),more=qs('#oyyaMoreButton'),close=qs('#oyyaMoreClose');
@@ -75,7 +72,6 @@
   audio.addEventListener('play',syncSongs);audio.addEventListener('pause',syncSongs);audio.addEventListener('ended',()=>{const next=(currentSong+1)%songs.length;playSong(next)});
   const toggleMusic=()=>musicPanel.classList.toggle('is-open');
   qs('[data-close-music]',musicPanel)?.addEventListener('click',()=>musicPanel.classList.remove('is-open'));
-  qs('[data-oyya-music]')?.addEventListener('click',toggleMusic);
 
   const radioNav=qs('#oyyaRadioNav');
   if(radioNav){const label=radioNav.querySelector('span:last-child');if(label)label.textContent='موسيقى';radioNav.addEventListener('click',e=>{e.preventDefault();toggleMusic()});}
