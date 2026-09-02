@@ -8,7 +8,16 @@ function oyya_create_media_post(string $uid,array $in,?array $file=null): array 
     if($file&&(($file['error']??UPLOAD_ERR_NO_FILE)===UPLOAD_ERR_OK)){[$ok,$res]=oyya_upload_media($uid,$file,'post');if(!$ok)return[false,$res];$mediaId=$res;}
     if($text===''&&$mediaId==='')return[false,'اكتب شيئًا أو أضف وسائط.'];
     $nearby=!empty($in['nearby']);$row=['id'=>oyya_id(),'user_id'=>$uid,'text'=>$text,'media_id'=>$mediaId,'nearby'=>$nearby,'kind'=>'post','created_at'=>oyya_now()];
-    if($nearby){$row['map_until']=time()+86400;$loc=function_exists('oyya_location')?oyya_location($uid):null;if($loc){$row['map_lat']=(float)$loc['lat'];$row['map_lng']=(float)$loc['lng'];}}
+    if($nearby){
+        $row['map_until']=time()+86400;
+        $lat=isset($in['lat'])?(float)$in['lat']:null;$lng=isset($in['lng'])?(float)$in['lng']:null;
+        if($lat!==null&&$lng!==null&&$lat>=-90&&$lat<=90&&$lng>=-180&&$lng<=180){
+            $row['map_lat']=$lat;$row['map_lng']=$lng;
+            if(function_exists('oyya_location_set'))oyya_location_set($uid,$lat,$lng);
+        }else{
+            $loc=function_exists('oyya_location')?oyya_location($uid):null;if($loc){$row['map_lat']=(float)$loc['lat'];$row['map_lng']=(float)$loc['lng'];}
+        }
+    }
     $p=oyya_read('posts');$p[]=$row;oyya_write('posts',$p);return[true,$nearby?'تم النشر وسيظهر على خريطة الأحداث لمدة 24 ساعة.':'تم النشر.'];
 }
 function oyya_add_audio_comment(string $uid,string $post,array $file): array {[$ok,$res]=oyya_upload_media($uid,$file,'voice_comment');if(!$ok)return[false,$res];$c=oyya_read('comments');$c[]=['id'=>oyya_id(),'post_id'=>$post,'user_id'=>$uid,'text'=>'','media_id'=>$res,'created_at'=>oyya_now()];oyya_write('comments',$c);foreach(oyya_read('posts') as $p)if(($p['id']??'')===$post&&($p['user_id']??'')!==$uid)oyya_notify((string)$p['user_id'],'لديك تعليق صوتي جديد على منشورك.','comment');return[true,'تم إرسال التعليق الصوتي.'];}
