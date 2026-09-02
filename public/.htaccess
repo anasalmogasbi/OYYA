@@ -1,2 +1,16 @@
 DirectoryIndex index.php index.html
 Options -Indexes
+
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteRule ^data(?:/|$) - [F,L]
+</IfModule>
+
+<FilesMatch "\.(json|log|sqlite|db)$">
+Require all denied
+</FilesMatch>
+
+<IfModule mod_php.c>
+php_value upload_max_filesize 20M
+php_value post_max_size 24M
+</IfModule>
