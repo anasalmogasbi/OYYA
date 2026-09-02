@@ -1,0 +1,10 @@
+.env
+.env.*
+!.env.example
+runtime/
+storage/
+public/uploads/
+public/media/
+*.log
+.DS_Store
+Thumbs.db
