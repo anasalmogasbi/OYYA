@@ -1,7 +1,7 @@
 (()=>{
   const params=new URLSearchParams(location.search);
   if((params.get('view')||'feed')!=='map')return;
-  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#039;'}[c]));
   const ready=fn=>document.readyState==='loading'?document.addEventListener('DOMContentLoaded',fn,{once:true}):fn();
 
   const food=(lock)=>`https://loremflickr.com/900/700/food,restaurant?lock=${lock}`;
@@ -24,19 +24,19 @@
     styleEl.textContent=`
       .oyya-vector-stage{position:relative;background:#dfeee8!important}
       .oyya-vector-stage #oyyaVectorLibyaMap{position:absolute;inset:0;width:100%;height:100%}
-      .oyya-my-location{position:absolute;z-index:15;right:14px;bottom:92px;width:48px;height:48px;border:0;border-radius:50%;background:#fff;color:#17191d;box-shadow:0 7px 24px #0003;font-size:25px;display:grid;place-items:center;cursor:pointer}
-      .oyya-my-location.is-loading{opacity:.65;pointer-events:none}.oyya-my-location.is-active{background:#111;color:#fff}
-      .oyya-location-status{position:absolute;z-index:14;right:70px;bottom:99px;background:#111d;color:#fff;border-radius:999px;padding:7px 10px;font:700 11px Tahoma,'Segoe UI',Arial,sans-serif;display:none}.oyya-location-status.on{display:block}
+      .oyya-my-location{position:absolute;z-index:15;right:14px;bottom:92px;width:48px;height:48px;border:0;border-radius:50%;background:#fffc00;color:#17191d;box-shadow:0 7px 24px #0003;font-size:25px;display:grid;place-items:center;cursor:pointer}
+      .oyya-my-location.is-loading{opacity:.65;pointer-events:none}.oyya-my-location.is-active{background:#fffc00;color:#111}
+      .oyya-location-status{position:absolute;z-index:14;right:70px;bottom:99px;background:#fffc00;color:#111;border-radius:999px;padding:7px 10px;font:700 11px Tahoma,'Segoe UI',Arial,sans-serif;display:none}.oyya-location-status.on{display:block}
       .oyya-user-dot{width:22px;height:22px;border-radius:50%;background:#2288ff;border:4px solid #fff;box-shadow:0 0 0 5px #2288ff33,0 3px 12px #0004}
       .oyya-snap-ad{border:0;background:transparent;padding:0;cursor:pointer;filter:drop-shadow(0 5px 8px #0004);transform-origin:center bottom}
       .oyya-snap-ad .pic{width:58px;height:58px;border-radius:50%;object-fit:cover;border:4px solid #fff;display:block;background:#eee}
-      .oyya-snap-ad .bubble{margin-top:-5px;background:#fff;color:#17191d;border-radius:999px;padding:5px 9px;white-space:nowrap;font:900 10px Tahoma,'Segoe UI',Arial,sans-serif;border:1px solid #e1e4e8;max-width:118px;overflow:hidden;text-overflow:ellipsis}
+      .oyya-snap-ad .bubble{margin-top:-5px;background:#fffc00;color:#17191d;border-radius:999px;padding:5px 9px;white-space:nowrap;font:900 10px Tahoma,'Segoe UI',Arial,sans-serif;border:1px solid #e7df00;max-width:118px;overflow:hidden;text-overflow:ellipsis}
       .oyya-snap-ad.l3{transform:scale(1.16)}.oyya-snap-ad.l2{transform:scale(1.07)}
       .oyya-map-card{max-height:58vh;overflow:auto;padding:0!important;border-radius:22px!important;direction:rtl}
       .oyya-map-card .oyya-ad-hero{width:100%;height:170px;object-fit:cover;border-radius:22px 22px 0 0;display:block}
       .oyya-map-card .oyya-ad-body{padding:14px}.oyya-map-card .oyya-ad-body h3{margin:0 0 4px;font-size:21px}.oyya-map-card .oyya-ad-body small{color:#777}
       .oyya-ad-gallery{display:grid;grid-auto-flow:column;grid-auto-columns:92px;gap:7px;overflow-x:auto;padding:10px 0 4px;scroll-snap-type:x proximity}.oyya-ad-gallery img{width:92px;height:76px;object-fit:cover;border-radius:12px;scroll-snap-align:start;background:#eee}
-      .oyya-map-actions{padding-top:8px}.oyya-map-actions a{display:inline-flex!important;align-items:center;justify-content:center;min-height:38px}
+      .oyya-map-actions{padding-top:10px;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px!important}.oyya-map-actions a{display:flex!important;align-items:center;justify-content:center;min-height:42px;text-align:center!important;border-radius:13px!important;text-decoration:none!important;font-weight:800!important}.oyya-map-actions .oyya-action-primary{background:#fffc00!important;color:#111!important;border:1px solid #e7df00!important}.oyya-map-actions .oyya-action-whatsapp{background:#eefbf1!important;color:#147a34!important;border:1px solid #ccefd5!important}.oyya-map-actions .oyya-action-oyya{background:#111!important;color:#fff!important}.oyya-map-actions .oyya-action-directions{background:#f1f2f4!important;color:#111!important;border:1px solid #e0e2e5!important}
       @media(max-width:560px){.oyya-my-location{right:12px;bottom:88px}.oyya-location-status{right:66px;bottom:95px}.oyya-map-card .oyya-ad-hero{height:145px}}
     `;
     document.head.appendChild(styleEl);
@@ -82,7 +82,7 @@
     };
 
     const showRestaurant=r=>{
-      card.innerHTML=`<img class="oyya-ad-hero" src="${esc(r.cover)}" alt="${esc(r.name)}"><div class="oyya-ad-body"><h3>${esc(r.name)}</h3><small>إعلان ممول · ${esc(r.city)}</small><p>${esc(r.description)}</p><div class="oyya-ad-gallery">${r.gallery.map((u,i)=>`<img src="${esc(u)}" alt="${esc(r.name)} ${i+1}" loading="lazy">`).join('')}</div><div class="oyya-map-actions"><a href="https://wa.me/${esc(r.whatsapp)}" target="_blank" rel="noopener">واتساب</a><a href="/?view=messages">رسائل</a><a href="https://www.google.com/maps?q=${encodeURIComponent(r.lat+','+r.lng)}" target="_blank" rel="noopener">اتجاهات</a></div></div>`;
+      card.innerHTML=`<img class="oyya-ad-hero" src="${esc(r.cover)}" alt="${esc(r.name)}"><div class="oyya-ad-body"><h3>${esc(r.name)}</h3><small>إعلان ممول · ${esc(r.city)}</small><p>${esc(r.description)}</p><div class="oyya-ad-gallery">${r.gallery.map((u,i)=>`<img src="${esc(u)}" alt="${esc(r.name)} ${i+1}" loading="lazy">`).join('')}</div><div class="oyya-map-actions"><a class="oyya-action-primary" href="https://www.presto.app" target="_blank" rel="noopener">اطلب بريستو</a><a class="oyya-action-whatsapp" href="https://wa.me/${esc(r.whatsapp)}" target="_blank" rel="noopener">اطلب على واتساب</a><a class="oyya-action-oyya" href="/?view=messages">احجز واستلم على OYYA</a><a class="oyya-action-directions" href="https://www.google.com/maps?q=${encodeURIComponent(r.lat+','+r.lng)}" target="_blank" rel="noopener">اتجاهات</a></div></div>`;
       card.classList.add('on');map.easeTo({center:[r.lng,r.lat],zoom:15.7,duration:500});
     };
     const addRestaurant=r=>{
