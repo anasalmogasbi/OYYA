@@ -62,7 +62,26 @@ function oyya_friend_request(string $uid,string $target): array {
     foreach($rows as $r)if((($r['requester_id']??'')===$uid&&($r['recipient_id']??'')===$target)&&($r['status']??'')==='pending')return[false,'الطلب مرسل بالفعل.'];
     $rows[]=['id'=>oyya_id(),'requester_id'=>$uid,'recipient_id'=>$target,'status'=>'pending','created_at'=>oyya_now()];oyya_write('friend_requests',$rows);oyya_notify($target,'لديك طلب تعارف/صداقة جديد.','friend_request');return[true,'تم إرسال الطلب.'];
 }
-function oyya_friend_respond(string $uid,string $id,string $status): void {$rows=oyya_read('friend_requests');foreach($rows as &$r)if(($r['id']??'')===$id&&($r['recipient_id']??'')===$uid&&($r['status']??'')==='pending'){$r['status']=in_array($status,['accepted','declined'],true)?$status:'declined';if($r['status']==='accepted'){oyya_toggle_follow($uid,(string)$r['requester_id']);oyya_toggle_follow((string)$r['requester_id'],$uid);oyya_notify((string)$r['requester_id'],'تم قبول طلبك.','friend_request');}}oyya_write('friend_requests',$rows);}
+function oyya_ensure_follow(string $follower,string $target): void {
+    if($follower===$target||oyya_is_following($follower,$target)) return;
+    $rows=oyya_read('follows');
+    $rows[]=['follower_id'=>$follower,'target_id'=>$target,'created_at'=>oyya_now()];
+    oyya_write('follows',$rows);
+}
+function oyya_friend_respond(string $uid,string $id,string $status): void {
+    $rows=oyya_read('friend_requests');
+    foreach($rows as &$r){
+        if(($r['id']??'')!==$id||($r['recipient_id']??'')!==$uid||($r['status']??'')!=='pending') continue;
+        $r['status']=in_array($status,['accepted','declined'],true)?$status:'declined';
+        if($r['status']==='accepted'){
+            $requester=(string)$r['requester_id'];
+            oyya_ensure_follow($uid,$requester);
+            oyya_ensure_follow($requester,$uid);
+            oyya_notify($requester,'تم قبول طلبك.','friend_request');
+        }
+    }
+    oyya_write('friend_requests',$rows);
+}
 
 function oyya_create_game_room(string $uid,string $name,int $maxPlayers=6): array {
     $name=trim($name);if($name==='')$name='طاولة OYYA';$maxPlayers=in_array($maxPlayers,[2,4,6,8],true)?$maxPlayers:6;$rooms=oyya_read('game_rooms');$id=oyya_id();$rooms[]=['id'=>$id,'owner_id'=>$uid,'name'=>$name,'max_players'=>$maxPlayers,'players'=>[$uid],'turn_index'=>0,'round'=>1,'scores'=>[$uid=>0],'status'=>'waiting','created_at'=>oyya_now()];oyya_write('game_rooms',$rooms);return[true,$id];
