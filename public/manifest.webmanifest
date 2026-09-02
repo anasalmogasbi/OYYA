@@ -1,12 +1,22 @@
 {
+  "id": "/",
   "name": "OYYA — عالمك حولك",
   "short_name": "OYYA",
   "lang": "ar",
   "dir": "rtl",
-  "start_url": "/",
+  "start_url": "/home",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#0b1020",
-  "theme_color": "#111827",
-  "description": "OYYA - Libya Digital World"
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#f5f6f8",
+  "theme_color": "#fffc00",
+  "description": "عالم ليبي اجتماعي للأشخاص والأحداث والفرص والمحتوى حولك.",
+  "categories": ["social", "lifestyle", "entertainment"],
+  "shortcuts": [
+    {"name":"الرئيسية","url":"/home"},
+    {"name":"خريطة الأحداث","url":"/map"},
+    {"name":"الناس","url":"/people"},
+    {"name":"الرسائل","url":"/messages"}
+  ]
 }
