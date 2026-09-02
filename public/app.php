@@ -41,8 +41,9 @@ function oyya_seed_system_user(): void {
       ['demo-omar','عمر الفيتوري','بنغازي','مختص موارد بشرية وتوظيف','Recruitment، HR، Career Coaching','الوظائف، التعليم، التطوير','أربط الشركات بالكفاءات وأساعد الشباب في بناء مسار مهني أوضح.','جري، كتب، تطوع','توظيف ومراجعة ملفات مهنية','مواهب وشركات توظف','https://i.pravatar.cc/300?img=5','People First Libya','جامعة بنغازي','6 سنوات']
     ];
     foreach($demo as $d){
-      if(in_array($d[0],array_column($users,'id'),true))continue;
-      $users[]=['id'=>$d[0],'name'=>$d[1],'phone'=>'','password_hash'=>'','city'=>$d[2],'headline'=>$d[3],'skills'=>$d[4],'interests'=>$d[5],'study_work'=>$d[10],'hobbies'=>$d[7],'offers'=>$d[8],'seeks'=>$d[9],'bio'=>$d[6],'avatar'=>$d[11],'company'=>$d[10],'education'=>$d[11]??'','experience'=>$d[12]??'','location_visibility'=>'city','verified'=>true,'system'=>true,'demo_profile'=>true,'created_at'=>oyya_now()];
+      $existingIndex=null; foreach($users as $i=>$u)if(($u['id']??'')===$d[0]){$existingIndex=$i;break;}
+      $row=['id'=>$d[0],'name'=>$d[1],'phone'=>'','password_hash'=>'','city'=>$d[2],'headline'=>$d[3],'skills'=>$d[4],'interests'=>$d[5],'study_work'=>$d[11],'hobbies'=>$d[7],'offers'=>$d[8],'seeks'=>$d[9],'bio'=>$d[6],'avatar'=>$d[10],'company'=>$d[11],'education'=>$d[12],'experience'=>$d[13],'location_visibility'=>'city','verified'=>true,'system'=>true,'demo_profile'=>true,'created_at'=>oyya_now()];
+      if($existingIndex===null)$users[]=$row; else $users[$existingIndex]=array_merge($users[$existingIndex],$row);
     }
     oyya_save_users($users);
 }
