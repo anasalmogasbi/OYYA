@@ -13,6 +13,6 @@ file_put_contents($tmp,$source,LOCK_EX);
 ob_start();
 require $tmp;
 $out=(string)ob_get_clean();
-$assets='<link rel="stylesheet" href="/oyya-experience.css?v=1"><script defer src="/oyya-experience.js?v=1"></script>';
+$assets='<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"><link rel="stylesheet" href="/oyya-experience.css?v=2"><script defer src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script><script defer src="/oyya-experience.js?v=2"></script>';
 if(stripos($out,'</head>')!==false)$out=str_ireplace('</head>',$assets.'</head>',$out);
 echo $out;
