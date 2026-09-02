@@ -11,7 +11,6 @@
 
   const nav=qs('#oyyaSmartNav');
   if(nav){
-    const fixed=['feed'];
     const candidates=Object.keys(labels).filter(v=>!['feed','reels'].includes(v));
     candidates.sort((a,b)=>(usage[b]||0)-(usage[a]||0));
     const dynamic=candidates.filter(v=>(usage[v]||0)>0).slice(0,1);
@@ -34,7 +33,7 @@
   const most=Object.entries(usage).filter(([v,n])=>labels[v]&&n>1&&!['feed','reels'].includes(v)).sort((a,b)=>b[1]-a[1]).slice(0,2);
   if(most.length&&document.body){
     const bar=document.createElement('div');bar.className='oyya-most-used';bar.setAttribute('aria-label','الأكثر دخولًا');
-    most.forEach(([v,n])=>{const a=document.createElement('a');a.className='oyya-most-chip';a.href='/?view='+encodeURIComponent(v);a.dataset.view=v;a.innerHTML='<strong>'+labels[v]+'</strong> · الأكثر دخولًا';a.addEventListener('click',()=>track(v));bar.appendChild(a)});
+    most.forEach(([v])=>{const a=document.createElement('a');a.className='oyya-most-chip';a.href='/?view='+encodeURIComponent(v);a.dataset.view=v;a.innerHTML='<strong>'+labels[v]+'</strong> · الأكثر دخولًا';a.addEventListener('click',()=>track(v));bar.appendChild(a)});
     document.body.appendChild(bar);
   }
 
@@ -69,4 +68,8 @@
     card.addEventListener('click',()=>{adhan.checked=!adhan.checked;adhan.dispatchEvent(new Event('change'));card.querySelector('small').textContent=(adhan.checked?'مفعّل':'متوقف')+' · اضغط للتبديل'});
     moreGrid?.appendChild(card);
   }
+
+  const tick=()=>fetch('/tick.php',{cache:'no-store',credentials:'same-origin'}).catch(()=>{});
+  setTimeout(tick,5000);
+  setInterval(tick,5000);
 })();
