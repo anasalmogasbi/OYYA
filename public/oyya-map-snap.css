@@ -1,0 +1,7 @@
+body.oyya-view-map #oyyaBottomShell [data-view="map"].is-active{color:#17191d!important}
+body.oyya-view-map #oyyaBottomShell [data-view="map"].is-active .oyya-nav-icon{background:#fffc00!important;color:#111!important;width:38px!important;height:34px!important;border-radius:18px!important;box-shadow:0 4px 14px rgba(0,0,0,.12)!important}
+body.oyya-view-map .oyya-my-location{background:#fffc00!important;color:#111!important;border:2px solid #fff!important}
+body.oyya-view-map .oyya-my-location.is-active{background:#fffc00!important;color:#111!important;box-shadow:0 0 0 5px rgba(255,252,0,.25),0 7px 24px rgba(0,0,0,.22)!important}
+body.oyya-view-map .maplibregl-ctrl-group button{background-color:#fffc00!important;color:#111!important}
+body.oyya-view-map .maplibregl-ctrl-group{border-radius:16px!important;overflow:hidden!important;box-shadow:0 5px 18px rgba(0,0,0,.16)!important}
+body.oyya-view-map .oyya-location-status{background:#fffc00!important;color:#111!important}
