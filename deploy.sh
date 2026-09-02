@@ -12,11 +12,16 @@ fi
 
 mkdir -p "$LIVE_ROOT"
 
-# Deploy only web-safe public files. Never expose .git, runtime config, or secrets.
-rsync -a --delete \
-  --exclude='uploads/' \
-  --exclude='media/' \
-  "$PUBLIC_SOURCE/" "$LIVE_ROOT/"
+# Shared hosting fallback: deploy public files without rsync.
+# Runtime uploads/media are preserved and source secrets/.git are never exposed.
+find "$LIVE_ROOT" -mindepth 1 -maxdepth 1 \
+  ! -name 'uploads' \
+  ! -name 'media' \
+  -exec rm -rf -- {} +
+
+cp -a "$PUBLIC_SOURCE"/. "$LIVE_ROOT"/
+
+rm -f "$LIVE_ROOT/oyya-test.txt"
 
 echo "OYYA DEPLOY: PASS"
 echo "Source: $PUBLIC_SOURCE"
