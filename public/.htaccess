@@ -4,6 +4,22 @@ Options -Indexes
 <IfModule mod_rewrite.c>
 RewriteEngine On
 RewriteRule ^data(?:/|$) - [F,L]
+RewriteRule ^home/?$ /?view=feed [L,QSA]
+RewriteRule ^reels/?$ /?view=reels [L,QSA]
+RewriteRule ^map/?$ /?view=map [L,QSA]
+RewriteRule ^people/?$ /?view=people [L,QSA]
+RewriteRule ^profile/?$ /?view=profile [L,QSA]
+RewriteRule ^messages/?$ /?view=messages [L,QSA]
+RewriteRule ^notifications/?$ /?view=notifications [L,QSA]
+RewriteRule ^games/?$ /?view=games [L,QSA]
+RewriteRule ^music/?$ /?view=feed&oyya_page=music [L,QSA]
+RewriteRule ^pages/?$ /?view=pages [L,QSA]
+RewriteRule ^explore/?$ /?view=explore [L,QSA]
+RewriteRule ^saved/?$ /?view=saved [L,QSA]
+RewriteRule ^albums/?$ /?view=albums [L,QSA]
+RewriteRule ^communities/?$ /?view=communities [L,QSA]
+RewriteRule ^events/?$ /?view=events [L,QSA]
+RewriteRule ^opportunities/?$ /?view=opportunities [L,QSA]
 </IfModule>
 
 <FilesMatch "\.(json|log|sqlite|db)$">
