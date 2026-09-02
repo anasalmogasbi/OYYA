@@ -14,7 +14,7 @@ ob_start();
 require $tmp;
 $out=(string)ob_get_clean();
 $isMap=((string)($_GET['view']??'feed'))==='map';
-$mapAssets='<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@5.7.0/dist/maplibre-gl.css"><link rel="stylesheet" href="/oyya-map-snap.css?v=1"><script defer src="https://cdn.jsdelivr.net/npm/maplibre-gl@5.7.0/dist/maplibre-gl.js"></script><script defer src="/oyya-vector-map.js?v=4"></script>';
+$mapAssets='<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@5.7.0/dist/maplibre-gl.css"><link rel="stylesheet" href="/oyya-map-snap.css?v=1"><script defer src="https://cdn.jsdelivr.net/npm/maplibre-gl@5.7.0/dist/maplibre-gl.js"></script><script defer src="/oyya-vector-map.js?v=5"></script>';
 $experienceAsset=$isMap?'':'<script defer src="/oyya-experience.js?v=4"></script>';
 $assets=$mapAssets.'<link rel="stylesheet" href="/oyya-experience.css?v=2">'.$experienceAsset.'<script defer src="/oyya-nav-gesture.js?v=2"></script><script defer src="/oyya-composer.js?v=1"></script>';
 if(stripos($out,'</head>')!==false)$out=str_ireplace('</head>',$assets.'</head>',$out);
