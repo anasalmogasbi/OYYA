@@ -1,0 +1,7 @@
+<?php
+declare(strict_types=1);
+function oyya_location_set(string $uid,float $lat,float $lng): array {if($lat<-90||$lat>90||$lng<-180||$lng>180)return[false,'إحداثيات غير صالحة.'];$r=oyya_read('locations');$found=false;foreach($r as &$x)if(($x['user_id']??'')===$uid){$x=['user_id'=>$uid,'lat'=>$lat,'lng'=>$lng,'updated_at'=>oyya_now()];$found=true;}if(!$found)$r[]=['user_id'=>$uid,'lat'=>$lat,'lng'=>$lng,'updated_at'=>oyya_now()];oyya_write('locations',$r);return[true,'تم تحديث موقعك الخاص بخوارزمية حولك.'];}
+function oyya_location(string $uid): ?array {foreach(oyya_read('locations') as $x)if(($x['user_id']??'')===$uid)return$x;return null;}
+function oyya_distance_km(array $a,array $b): float {$R=6371;$dLat=deg2rad((float)$b['lat']-(float)$a['lat']);$dLon=deg2rad((float)$b['lng']-(float)$a['lng']);$aa=sin($dLat/2)**2+cos(deg2rad((float)$a['lat']))*cos(deg2rad((float)$b['lat']))*sin($dLon/2)**2;return 2*$R*asin(min(1,sqrt($aa)));}
+function oyya_approx_distance(string $viewer,string $target): ?float {$a=oyya_location($viewer);$b=oyya_location($target);if(!$a||!$b)return null;return oyya_distance_km($a,$b);}
+function oyya_nearby_posts(string $uid,float $radius=50): array {$mine=oyya_location($uid);$posts=array_reverse(oyya_read('posts'));return array_values(array_filter($posts,function($p)use($uid,$mine,$radius){if(empty($p['nearby']))return false;$owner=(string)($p['user_id']??'');if($owner===$uid)return true;if(!$mine)return true;$other=oyya_location($owner);return $other?oyya_distance_km($mine,$other)<=$radius:false;}));}
