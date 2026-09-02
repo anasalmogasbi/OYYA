@@ -41,13 +41,7 @@
     `;
     document.head.appendChild(styleEl);
 
-    const map=new maplibregl.Map({
-      container:'oyyaVectorLibyaMap',
-      style:'https://tiles.openfreemap.org/styles/liberty',
-      center:[20.0884,32.1021],zoom:14.6,minZoom:5,maxZoom:19,
-      maxBounds:[[8.2,18.2],[26.3,34.3]],
-      attributionControl:false,pitchWithRotate:false,dragRotate:false,touchPitch:false
-    });
+    const map=new maplibregl.Map({container:'oyyaVectorLibyaMap',style:'https://tiles.openfreemap.org/styles/liberty',center:[20.0884,32.1021],zoom:14.6,minZoom:5,maxZoom:19,maxBounds:[[8.2,18.2],[26.3,34.3]],attributionControl:false,pitchWithRotate:false,dragRotate:false,touchPitch:false});
     map.addControl(new maplibregl.NavigationControl({showCompass:false}),'top-left');
     map.addControl(new maplibregl.AttributionControl({compact:true}),'bottom-left');
 
@@ -64,14 +58,17 @@
             else map.setPaintProperty(layer.id,'fill-color','#eef1e9');
           }
           if(layer.type==='line'){
-            if(/road|street|transport|motorway|trunk|primary|secondary|tertiary/.test(key)){
-              map.setPaintProperty(layer.id,'line-color',/motorway|trunk|primary/.test(key)?'#f5ca69':'#ffffff');
-              if(map.getPaintProperty(layer.id,'line-opacity')!==undefined)map.setPaintProperty(layer.id,'line-opacity',1);
-            }else if(/boundary/.test(key))map.setPaintProperty(layer.id,'line-color','#c7cdd0');
+            if(/road|street|transport|motorway|trunk|primary|secondary|tertiary/.test(key)){map.setPaintProperty(layer.id,'line-color',/motorway|trunk|primary/.test(key)?'#f5ca69':'#ffffff');if(map.getPaintProperty(layer.id,'line-opacity')!==undefined)map.setPaintProperty(layer.id,'line-opacity',1);}
+            else if(/boundary/.test(key))map.setPaintProperty(layer.id,'line-color','#c7cdd0');
           }
           if(layer.type==='symbol'){
-            if(/poi|school|pharmacy|hospital|clinic|shop|amenity|university/.test(key))map.setLayoutProperty(layer.id,'visibility','none');
-            else if(/place|city|town|village|road|street/.test(key)){
+            if(/poi|school|pharmacy|hospital|clinic|shop|amenity|university/.test(key)){map.setLayoutProperty(layer.id,'visibility','none');continue;}
+            if(/place|city|town|village|road|street|transport/.test(key)){
+              const layout=layer.layout||{};
+              if(layout['text-field']!==undefined){
+                /* Prefer the source's real Arabic name. If Arabic is unavailable, keep the original local name; never transliterate it into Arabic letters. */
+                map.setLayoutProperty(layer.id,'text-field',['coalesce',['get','name:ar'],['get','name_ar'],['get','name']]);
+              }
               if(map.getPaintProperty(layer.id,'text-color')!==undefined)map.setPaintProperty(layer.id,'text-color','#475159');
               if(map.getPaintProperty(layer.id,'text-halo-color')!==undefined)map.setPaintProperty(layer.id,'text-halo-color','#ffffff');
               if(map.getPaintProperty(layer.id,'text-halo-width')!==undefined)map.setPaintProperty(layer.id,'text-halo-width',1.5);
@@ -81,40 +78,14 @@
       }
     };
 
-    const showRestaurant=r=>{
-      card.innerHTML=`<img class="oyya-ad-hero" src="${esc(r.cover)}" alt="${esc(r.name)}"><div class="oyya-ad-body"><h3>${esc(r.name)}</h3><small>إعلان ممول · ${esc(r.city)}</small><p>${esc(r.description)}</p><div class="oyya-ad-gallery">${r.gallery.map((u,i)=>`<img src="${esc(u)}" alt="${esc(r.name)} ${i+1}" loading="lazy">`).join('')}</div><div class="oyya-map-actions"><a class="oyya-action-primary" href="https://www.presto.app" target="_blank" rel="noopener">اطلب بريستو</a><a class="oyya-action-whatsapp" href="https://wa.me/${esc(r.whatsapp)}" target="_blank" rel="noopener">اطلب على واتساب</a><a class="oyya-action-oyya" href="/?view=messages">احجز واستلم على OYYA</a><a class="oyya-action-directions" href="https://www.google.com/maps?q=${encodeURIComponent(r.lat+','+r.lng)}" target="_blank" rel="noopener">اتجاهات</a></div></div>`;
-      card.classList.add('on');map.easeTo({center:[r.lng,r.lat],zoom:15.7,duration:500});
-    };
-    const addRestaurant=r=>{
-      const el=document.createElement('button');el.type='button';el.className=`oyya-snap-ad l${r.level}`;el.innerHTML=`<img class="pic" src="${esc(r.cover)}" alt=""><div class="bubble">${esc(r.name)}</div>`;
-      el.addEventListener('click',e=>{e.stopPropagation();showRestaurant(r)});
-      new maplibregl.Marker({element:el,anchor:'bottom'}).setLngLat([r.lng,r.lat]).addTo(map);
-    };
+    const showRestaurant=r=>{card.innerHTML=`<img class="oyya-ad-hero" src="${esc(r.cover)}" alt="${esc(r.name)}"><div class="oyya-ad-body"><h3>${esc(r.name)}</h3><small>إعلان ممول · ${esc(r.city)}</small><p>${esc(r.description)}</p><div class="oyya-ad-gallery">${r.gallery.map((u,i)=>`<img src="${esc(u)}" alt="${esc(r.name)} ${i+1}" loading="lazy">`).join('')}</div><div class="oyya-map-actions"><a class="oyya-action-primary" href="https://www.presto.app" target="_blank" rel="noopener">اطلب بريستو</a><a class="oyya-action-whatsapp" href="https://wa.me/${esc(r.whatsapp)}" target="_blank" rel="noopener">اطلب على واتساب</a><a class="oyya-action-oyya" href="/?view=messages">احجز واستلم على OYYA</a><a class="oyya-action-directions" href="https://www.google.com/maps?q=${encodeURIComponent(r.lat+','+r.lng)}" target="_blank" rel="noopener">اتجاهات</a></div></div>`;card.classList.add('on');map.easeTo({center:[r.lng,r.lat],zoom:15.7,duration:500});};
+    const addRestaurant=r=>{const el=document.createElement('button');el.type='button';el.className=`oyya-snap-ad l${r.level}`;el.innerHTML=`<img class="pic" src="${esc(r.cover)}" alt=""><div class="bubble">${esc(r.name)}</div>`;el.addEventListener('click',e=>{e.stopPropagation();showRestaurant(r)});new maplibregl.Marker({element:el,anchor:'bottom'}).setLngLat([r.lng,r.lat]).addTo(map);};
 
     let userMarker=null;
     const tell=(msg)=>{status.textContent=msg;status.classList.add('on');clearTimeout(tell.t);tell.t=setTimeout(()=>status.classList.remove('on'),2600)};
-    const locate=()=>{
-      if(!navigator.geolocation){tell('الموقع غير مدعوم على هذا الجهاز');return;}
-      locBtn.classList.add('is-loading');tell('جار تحديد موقعك…');
-      navigator.geolocation.getCurrentPosition(pos=>{
-        const lng=pos.coords.longitude,lat=pos.coords.latitude;
-        if(userMarker)userMarker.remove();
-        const dot=document.createElement('div');dot.className='oyya-user-dot';
-        userMarker=new maplibregl.Marker({element:dot,anchor:'center'}).setLngLat([lng,lat]).addTo(map);
-        locBtn.classList.remove('is-loading');locBtn.classList.add('is-active');
-        map.easeTo({center:[lng,lat],zoom:16,duration:700});tell('هذا موقعك الحالي');
-      },err=>{
-        locBtn.classList.remove('is-loading');
-        tell(err.code===1?'اسمح لـ OYYA بالوصول إلى موقعك':'تعذر تحديد موقعك الآن');
-      },{enableHighAccuracy:true,timeout:10000,maximumAge:30000});
-    };
+    const locate=()=>{if(!navigator.geolocation){tell('الموقع غير مدعوم على هذا الجهاز');return;}locBtn.classList.add('is-loading');tell('جار تحديد موقعك…');navigator.geolocation.getCurrentPosition(pos=>{const lng=pos.coords.longitude,lat=pos.coords.latitude;if(userMarker)userMarker.remove();const dot=document.createElement('div');dot.className='oyya-user-dot';userMarker=new maplibregl.Marker({element:dot,anchor:'center'}).setLngLat([lng,lat]).addTo(map);locBtn.classList.remove('is-loading');locBtn.classList.add('is-active');map.easeTo({center:[lng,lat],zoom:16,duration:700});tell('هذا موقعك الحالي');},err=>{locBtn.classList.remove('is-loading');tell(err.code===1?'اسمح لـ OYYA بالوصول إلى موقعك':'تعذر تحديد موقعك الآن');},{enableHighAccuracy:true,timeout:10000,maximumAge:30000});};
     locBtn.addEventListener('click',locate);
-
-    map.on('load',()=>{
-      snapStyle();restaurants.forEach(addRestaurant);
-      setTimeout(locate,450);
-    });
-    map.on('styledata',snapStyle);
-    map.on('click',()=>card.classList.remove('on'));
+    map.on('load',()=>{snapStyle();restaurants.forEach(addRestaurant);setTimeout(locate,450);});
+    map.on('styledata',snapStyle);map.on('click',()=>card.classList.remove('on'));
   },140));
 })();
