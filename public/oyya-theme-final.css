@@ -1,0 +1,86 @@
+/* Final theme authority: loaded last so legacy black accents cannot override the selected theme. */
+:root{--oyya-danger:#ff3b4f}
+body:not(.oyya-view-reels){background:var(--oyya-bg)!important;color:var(--oyya-text)!important}
+
+/* Primary interactive surfaces */
+.oyya-exp-tab.on,
+.nav .pill.active,
+.btn:not(.danger),
+.small:not(.ghost):not(.danger),
+.oyya-publish-next.on,
+.new-intent,
+.oyya-interest-list button,
+.oyya-intent-actions button,
+.oyya-install-primary,
+.oyya-profile-actions button,
+.oyya-prof-enter,
+button.primary,
+.button.primary,
+[data-primary="true"]{
+  background:linear-gradient(135deg,var(--oyya-accent),var(--oyya-accent-2))!important;
+  color:var(--oyya-accent-ink)!important;
+  border-color:transparent!important;
+}
+
+/* Never leave generic black circles/buttons behind in the light themes. */
+.oyya-circle,
+.oyya-publish-avatar,
+.oyya-feed-avatar:not(:has(img)),
+.oyya-mini-me:not(:has(img)),
+.avatar:not(:has(img)){
+  background:var(--oyya-accent-soft)!important;
+  color:var(--oyya-text)!important;
+  border-color:var(--oyya-line)!important;
+}
+.oyya-circle.avatar,
+.oyya-top-profile-avatar{
+  background:linear-gradient(135deg,var(--oyya-accent),var(--oyya-accent-2))!important;
+  color:var(--oyya-accent-ink)!important;
+  overflow:hidden!important;
+  border:2px solid color-mix(in srgb,var(--oyya-accent) 65%,#fff)!important;
+}
+.oyya-top-profile-avatar img,.oyya-circle.avatar img{display:block!important;width:100%!important;height:100%!important;object-fit:cover!important;border-radius:50%!important}
+
+/* Brand always follows theme; dark mode uses white wordmark. */
+.oyya-logo-badge{background:linear-gradient(135deg,var(--oyya-accent),var(--oyya-accent-2))!important;border:0!important}
+.oyya-logo-word{color:var(--oyya-accent-ink)!important;-webkit-text-fill-color:var(--oyya-accent-ink)!important}
+html[data-oyya-theme="dark"] .oyya-logo-badge{background:#0a0a0c!important;border:1px solid #343840!important}
+html[data-oyya-theme="dark"] .oyya-logo-word{color:#fff!important;-webkit-text-fill-color:#fff!important}
+
+/* Navigation: every normal active section follows theme; map intentionally remains OYYA yellow. */
+.oyya-nav-item.is-active:not([data-view="map"]),
+.oyya-nav-item.active:not([data-view="map"]){color:var(--oyya-text)!important}
+.oyya-nav-item.is-active:not([data-view="map"]) .oyya-nav-icon,
+.oyya-nav-item.active:not([data-view="map"]) .oyya-nav-icon{
+  background:linear-gradient(135deg,var(--oyya-accent),var(--oyya-accent-2))!important;
+  color:var(--oyya-accent-ink)!important;
+}
+.oyya-nav-item[data-view="map"] .oyya-nav-icon{background:#fffc00!important;color:#111!important}
+
+/* Common legacy black UI pieces now inherit the user's theme. */
+.oyya-preview-chip,
+.oyya-install-box button,
+.oyya-publish-close,
+.oyya-post-menu button:not(.danger),
+.oyya-comment-menu button:not(.danger),
+.oyya-more-sheet button:not(.danger),
+.oyya-expand-icon,
+.oyya-theme-option[aria-pressed="true"]{
+  border-color:color-mix(in srgb,var(--oyya-accent) 50%,var(--oyya-line))!important;
+}
+.oyya-preview-chip{background:var(--oyya-accent)!important;color:var(--oyya-accent-ink)!important}
+.oyya-bottom-pull span,.oyya-expand-grip,.oyya-sheet-grip{background:linear-gradient(90deg,var(--oyya-accent),var(--oyya-accent-2))!important}
+
+/* Reaction semantics remain natural. */
+.badge,.danger,[data-act="like"].on b,.heart.on,.reaction.like.on{color:#fff!important;background:var(--oyya-danger)!important}
+.oyya-tk-actions [data-act="like"].on b{background:transparent!important;color:var(--oyya-danger)!important}
+
+/* Inputs and neutral surfaces should follow light/dark theme too. */
+input,textarea,select,.oyya-publish-prompt,.oyya-exp-tabs,.oyya-publish-launcher,.oyya-exp-post,.oyya-theme-card,.oyya-prof-card,.oyya-profile-block{
+  color:var(--oyya-text)!important;
+  border-color:var(--oyya-line)!important;
+}
+html[data-oyya-theme="dark"] input,html[data-oyya-theme="dark"] textarea,html[data-oyya-theme="dark"] select,html[data-oyya-theme="dark"] .oyya-publish-prompt{background:#20242c!important;color:#f7f8fb!important}
+
+/* The map identity remains yellow regardless of theme by product rule. */
+.oyya-snap-ad .bubble,.oyya-my-location,.oyya-location-status,.oyya-map-actions .oyya-action-primary{background:#fffc00!important;color:#111!important}
